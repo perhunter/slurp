@@ -1,0 +1,148 @@
+Somewhere along the line, I learned about a way to slurp files faster
+than by setting $/ to undef. The method is very simple, you do a single
+read call with the size of the file (which the -s operator provides).
+This bypasses the I/O loop inside perl that checks for EOF and does all
+sorts of processing. I then decided to experiment and found that
+sysread is even faster as you would expect. sysread bypasses all of
+Perl's stdio and reads the file from the kernel buffers directly into a
+Perl scalar. This is why the slurp code in File::Slurp uses
+sysopen/sysread/syswrite. All the rest of the code is just to support
+the various options and data passing techniques.
+
+
+Benchmarks can be enlightening, informative, frustrating and
+deceiving. It would make no sense to create a new and more complex slurp
+module unless it also gained signifigantly in speed. So I created a
+benchmark script which compares various slurp methods with differing
+file sizes and calling contexts. This script can be run from the main
+directory of the tarball like this:
+
+	perl -Ilib extras/slurp_bench.pl
+
+If you pass in an argument on the command line, it will be passed to
+timethese() and it will control the duration. It defaults to -2 which
+makes each benchmark run to at least 2 seconds of cpu time.
+
+The following numbers are from a run I did on my 300Mhz sparc. You will
+most likely get much faster counts on your boxes but the relative speeds
+shouldn't change by much. If you see major differences on your
+benchmarks, please send me the results and your Perl and OS
+versions. Also you can play with the benchmark script and add more slurp
+variations or data files.
+
+The rest of this section will be discussing the results of the
+benchmarks. You can refer to extras/slurp_bench.pl to see the code for
+the individual benchmarks. If the benchmark name starts with cpan_, it
+is either from Slurp.pm or File::Slurp.pm. Those starting with new_ are
+from the new File::Slurp.pm. Those that start with file_contents_ are
+from a client's code base. The rest are variations I created to
+highlight certain aspects of the benchmarks.
+
+The short and long file data is made like this:
+
+	my @lines = ( 'abc' x 30 . "\n")  x 100 ;
+	my $text = join( '', @lines ) ;
+
+	@lines = ( 'abc' x 40 . "\n")  x 1000 ;
+	$text = join( '', @lines ) ;
+
+So the short file is 9,100 bytes and the long file is 121,000
+bytes. 
+
+=head3 	Scalar Slurp of Short File
+
+	file_contents        651/s
+	file_contents_no_OO  828/s
+	cpan_read_file      1866/s
+	cpan_slurp          1934/s
+	read_file           2079/s
+	new                 2270/s
+	new_buf_ref         2403/s
+	new_scalar_ref      2415/s
+	sysread_file        2572/s
+
+=head3 	Scalar Slurp of Long File
+
+	file_contents_no_OO 82.9/s
+	file_contents       85.4/s
+	cpan_read_file       250/s
+	cpan_slurp           257/s
+	read_file            323/s
+	new                  468/s
+	sysread_file         489/s
+	new_scalar_ref       766/s
+	new_buf_ref          767/s
+
+The primary inference you get from looking at the mumbers above is that
+when slurping a file into a scalar, the longer the file, the more time
+you save by returning the result via a scalar reference. The time for
+the extra buffer copy can add up. The new module came out on top overall
+except for the very simple sysread_file entry which was added to
+highlight the overhead of the more flexible new module which isn't that
+much. The file_contents entries are always the worst since they do a
+list slurp and then a join, which is a classic newbie and cargo culted
+style which is extremely slow. Also the OO code in file_contents slows
+it down even more (I added the file_contents_no_OO entry to show this).
+The two CPAN modules are decent with small files but they are laggards
+compared to the new module when the file gets much larger.
+
+=head3 	List Slurp of Short File
+
+	cpan_read_file          589/s
+	cpan_slurp_to_array     620/s
+	read_file               824/s
+	new_array_ref           824/s
+	sysread_file            828/s
+	new                     829/s
+	new_in_anon_array       833/s
+	cpan_slurp_to_array_ref 836/s
+
+=head3 	List Slurp of Long File
+
+	cpan_read_file          62.4/s
+	cpan_slurp_to_array     62.7/s
+	read_file               92.9/s
+	sysread_file            94.8/s
+	new_array_ref           95.5/s
+	new                     96.2/s
+	cpan_slurp_to_array_ref 96.3/s
+	new_in_anon_array       97.2/s
+
+
+=head3 	Scalar Spew of Short File
+
+	cpan_write_file 1035/s
+	print_file      1055/s
+	syswrite_file   1135/s
+	new             1519/s
+	print_join_file 1766/s
+	new_ref         1900/s
+	syswrite_file2  2138/s
+
+=head3 	Scalar Spew of Long File
+
+	cpan_write_file 164/s	20
+	print_file      211/s	26
+	syswrite_file   236/s	25
+	print_join_file 277/s	2
+	new             295/s	2
+	syswrite_file2  428/s	25
+	new_ref         608/s	2
+
+
+=head3 List Spew of Short File
+
+	cpan_write_file  794/s
+	syswrite_file   1000/s
+	print_file      1013/s
+	new             1399/s
+	print_join_file 1557/s
+
+=head3 	List Spew of Long File
+
+	cpan_write_file 112/s	12
+	print_file      179/s	21
+	syswrite_file   181/s	19
+	print_join_file 205/s	2
+	new             228/s	2
+

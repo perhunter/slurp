@@ -1,0 +1,5 @@
+
+# DATA handle is always untainted but all other handles are tainted
+
+use B
+svref_2object($foo)->IoFLAGS & 16

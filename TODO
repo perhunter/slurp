@@ -1,0 +1,27 @@
+
+optimize read_file for smaller scalar slurps with no options
+
+prepend_file()
+
+	options: lock file?
+
+edit_file()
+
+	options: lock file?
+
+edit_file_lines()
+
+	options: lock file?
+
+add options to read_dir
+	prepend_dir
+	grep filter qr or code ref
+
+
+BUGS:
+
+restart sysread/write after a signal (or check i/o count)
+
+fix SEEK stuff
+
+
