@@ -13,8 +13,7 @@ use File::Slurp () ;
 
 my $file = 'slurp_data' ;
 
-GetOptions (\my %opts,
-	qw( slurp spew scalar list sizes=s key duration=i help ) ) ;
+my %opts ;
 
 parse_options() ;
 
@@ -28,11 +27,14 @@ my( @lines, $text, $size ) ;
 
 sub run_benchmarks {
 
-	foreach my $size ( @{$opts{sizes}} ) {
+	foreach my $size ( @{$opts{size_list}} ) {
 
-		@lines = ( 'a' x 80 . "\n") x $size ;
+		@lines = ( 'a' x 80 . "\n") x ( $size / 81 + 1 ) ;
 		$text = join( '', @lines ) ;
-		$size = length $text ;
+
+		my $overage = length($text) - $size ;
+		substr( $text, -$overage, $overage, '' ) ;
+		substr( $lines[-1], -$overage, $overage, '' ) ;
 
 		File::Slurp::write_file( $file, $text ) ;
 
@@ -275,31 +277,107 @@ sub orig_write_file
 
 sub parse_options {
 
-	help() if $opts{help} ;
+	my $result = GetOptions (\%opts, qw(
+		iterations|i=s
+		direction|d=s
+		context|c=s
+		sizes|s=s
+		legend|key|l|k
+		help|usage
+	) ) ;
 
-	key() if $opts{key} ;
+	usage() unless $result ;
 
-	unless( $opts{spew} || $opts{slurp} ) {
+	usage() if $opts{help} ;
 
+	legend() if $opts{legend} ;
+
+# set defaults
+
+	$opts{direction} ||= 'both' ;
+	$opts{context} ||= 'both' ;
+	$opts{iterations} ||= -2 ;
+	$opts{sizes} ||= '500,10k,1m' ;
+
+	if ( $opts{direction} eq 'both' ) {
+	
 		$opts{spew} = 1 ;
 		$opts{slurp} = 1 ;
 	}
+	elsif ( $opts{direction} eq 'in' ) {
 
-	unless( $opts{list} || $opts{scalar} ) {
+		$opts{slurp} = 1 ;
+	
+	}
+	elsif ( $opts{direction} eq 'out' ) {
 
+		$opts{spew} = 1 ;
+	}
+	else {
+
+		usage( "Unknown direction: $opts{direction}" ) ;
+	}
+
+	if ( $opts{context} eq 'both' ) {
+	
 		$opts{list} = 1 ;
 		$opts{scalar} = 1 ;
 	}
+	elsif ( $opts{context} eq 'scalar' ) {
 
-	$opts{sizes} = [split ',', ( $opts{sizes} || '10,100,1000' ) ];
+		$opts{scalar} = 1 ;
+	
+	}
+	elsif ( $opts{context} eq 'list' ) {
 
-	$opts{duration} ||= -2 ;
+		$opts{list} = 1 ;
+	}
+	else {
+
+		usage( "Unknown context: $opts{context}" ) ;
+	}
+
+	if ( $opts{context} eq 'both' ) {
+	
+		$opts{list} = 1 ;
+		$opts{scalar} = 1 ;
+	}
+	elsif ( $opts{context} eq 'scalar' ) {
+
+		$opts{scalar} = 1 ;
+	
+	}
+	elsif ( $opts{context} eq 'list' ) {
+
+		$opts{list} = 1 ;
+	}
+	else {
+
+		usage( "Unknown context: $opts{context}" ) ;
+	}
+
+	foreach my $size ( split ',', ( $opts{sizes} ) ) {
+
+
+# check for valid size and suffix. grab both.
+
+		usage( "Illegal size: $size") unless $size =~ /^(\d+)([km])?$/ ;
+
+# handle suffix multipliers
+
+		$size =  $1 * (( $2 eq 'k' ) ? 1024 : 1024*1024) if $2 ;
+
+		push( @{$opts{size_list}}, $size ) ;
+	}
+
+#use Data::Dumper ;
+#print Dumper \%opts ;
 }
 
-sub key {
+sub legend {
 
-	print <<'KEY' ;
-
+	die <<'LEGEND' ;
+k
 Key to Slurp/Spew Benchmarks
 
 
@@ -316,37 +394,46 @@ Write a list of lines to a file
 	original write_file	Original (pre 9999.*) File::Slurp::write_file
 
 
-KEY
-
-	exit ;
+LEGEND
 }
 
-sub help {
+sub usage {
+
+	my( $err ) = @_ ;
+
+	$err ||= '' ;
 
 	die <<DIE ;
+$err
+Usage: $0 [--iterations=<iter>] [--direction=<dir>] [--context=<con>] 
+          [--sizes=<size_list>] [--legend] [--help]
 
-Usage: $0 [--list] [--scalar] [--slurp] [--spew]
-          [--sizes=10,100] [--help]
+	--iterations=<iter>	Run the benchmarks this many iterations
+	-i=<iter>		A positive number is iteration count,
+				a negative number is minimum CPU time in
+				seconds. Default is -2 (run for 2 CPU seconds).
 
-	--list		Run the list context benchmarks
-	--scalar	Run the scalar context benchmarks
-			Those default to on unless one is set
+	--direction=<dir>	Which direction to slurp: 'in', 'out' or 'both'.
+	-d=<dir>		Default is 'both'.
 
-	--slurp		Run the slurp benchmarks
-	--spew		Run the spew benchmarks
-			Those default to on unless one is set
+	--context=<con>		Which context is used for slurping: 'list',
+	-c=<con>		'scalar' or 'both'. Default is 'both'.
 
-	--sizes		Comma separated list of file sizes to benchmark
-			Defaults to 10,100,1000
+	--sizes=<size_list>	What sizes will be used in slurping (either
+	-s=<size_list>		direction). This is a comma separated list of
+				integers. You can use 'k' or 'm' as suffixes
+				for 1024 and 1024**2. Default is '500,1k,1m'.
 
-	--key		Print the benchmark names and code orig_ins
+	--legend		Print out a legend of all the benchmark entries.
+	--key
+	-l
+	-k
 
-	--help		Print this help text
-
+	--help			Print this help text
+	--usage
 DIE
 
 }
-
 
 __END__
 
