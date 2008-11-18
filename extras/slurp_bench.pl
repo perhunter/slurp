@@ -12,6 +12,7 @@ use Fcntl qw( :DEFAULT :seek );
 use File::Slurp () ;
 
 my $file = 'slurp_data' ;
+my( @lines, $text ) ;
 
 my %opts ;
 
@@ -22,8 +23,6 @@ run_benchmarks() ;
 unlink $file ;
 
 exit ;
-
-my( @lines, $text, $size ) ;
 
 sub run_benchmarks {
 
@@ -36,41 +35,107 @@ sub run_benchmarks {
 		substr( $text, -$overage, $overage, '' ) ;
 		substr( $lines[-1], -$overage, $overage, '' ) ;
 
-		File::Slurp::write_file( $file, $text ) ;
+		if ( $opts{slurp} ) {
 
-# 		bench_list_slurp( $size ) if $opts{list} && $opts{slurp} ;
-# 		bench_scalar_slurp( $size ) if $opts{scalar} && $opts{slurp} ;
- 		bench_spew_list()
-# 		bench_scalar_spew( $size ) if $opts{scalar} && $opts{spew} ;
+			File::Slurp::write_file( $file, $text ) ;
+
+			bench_list_slurp( $size ) if $opts{list} ;
+	 		bench_scalar_slurp( $size ) if $opts{scalar} ;
+		}
+
+		if ( $opts{spew} ) {
+
+			bench_spew_list( $size ) if $opts{list} ;
+	 		bench_scalar_spew( $size ) if $opts{scalar} ;
+		}
 	}
 }
 
 sub bench_spew_list {
 
-	return unless $opts{list} && $opts{spew} ;
+	my( $size ) = @_ ;
 
 	print "\n\nWriting (Spew) a list of lines: Size = $size bytes\n\n" ;
 
-	my $result = timethese( $opts{duration}, {
-
+	my $result = timethese( $opts{iterations}, {
  		'FS::write_file' =>
  	    		sub { File::Slurp::write_file( $file, @lines ) },
-
+ 		'FS::write_file Aref' =>
+ 	    		sub { File::Slurp::write_file( $file, \@lines ) },
 		'print' =>
 	    		sub { print_file( $file, @lines ) },
-
 		'print/join' =>
 			sub { print_join_file( $file, @lines ) },
-
 		'syswrite/join' =>
 			sub { syswrite_join_file( $file, @lines ) },
-
 		'original write_file' =>
 			sub { orig_write_file( $file, @lines ) },
-
 	} ) ;
 
 	cmpthese( $result ) ;
+}
+
+sub print_file {
+
+	my( $file_name ) = shift ;
+
+	unlink $file_name ;
+
+	local( *FH ) ;
+	open( FH, ">$file_name" ) || carp "can't create $file_name $!" ;
+
+	print FH @_ ;
+}
+
+sub print_join_file {
+
+	my( $file_name ) = shift ;
+
+	unlink $file_name ;
+
+	local( *FH ) ;
+	open( FH, ">$file_name" ) || carp "can't create $file_name $!" ;
+
+	print FH join( '', @_ ) ;
+}
+
+sub syswrite_join_file {
+
+	my( $file_name ) = shift ;
+
+	unlink $file_name ;
+
+	local( *FH ) ;
+	open( FH, ">$file_name" ) || carp "can't create $file_name $!" ;
+
+	syswrite( FH, join( '', @_ ) ) ;
+}
+
+sub sysopen_syswrite_join_file {
+
+	my( $file_name ) = shift ;
+
+	unlink $file_name ;
+
+	local( *FH ) ;
+	sysopen( FH, $file_name, O_WRONLY | O_CREAT ) ||
+				carp "can't create $file_name $!" ;
+
+	syswrite( FH, join( '', @_ ) ) ;
+}
+
+sub orig_write_file
+{
+	my ($f, @data) = @_;
+
+	unlink $f ;
+
+	local(*F);
+
+	open(F, ">$f") || croak "open >$f: $!";
+	(print F @data) || croak "write $f: $!";
+	close(F) || croak "close $f: $!";
+	return 1;
 }
 
 # sub bench_scalar_spew {
@@ -196,79 +261,6 @@ sub bench_spew_list {
 ###########################
 
 
-sub print_file {
-
-	my( $file_name ) = shift ;
-
-	local( *FH ) ;
-
-	open( FH, ">$file_name" ) || carp "can't create $file_name $!" ;
-
-	print FH @_ ;
-}
-
-sub print_file2 {
-
-	my( $file_name ) = shift ;
-
-	local( *FH ) ;
-
-	my $mode = ( -e $file_name ) ? '<' : '>' ;
-
-	open( FH, "+$mode$file_name" ) || carp "can't create $file_name $!" ;
-
-	print FH @_ ;
-}
-
-sub print_join_file {
-
-	my( $file_name ) = shift ;
-
-	local( *FH ) ;
-
-	my $mode = ( -e $file_name ) ? '<' : '>' ;
-
-	open( FH, "+$mode$file_name" ) || carp "can't create $file_name $!" ;
-
-	print FH join( '', @_ ) ;
-}
-
-
-sub syswrite_join_file {
-
-	my( $file_name ) = shift ;
-
-	local( *FH ) ;
-
-	open( FH, ">$file_name" ) || carp "can't create $file_name $!" ;
-
-	syswrite( FH, join( '', @_ ) ) ;
-}
-
-sub sysopen_syswrite_join_file {
-
-	my( $file_name ) = shift ;
-
-	local( *FH ) ;
-
-	sysopen( FH, $file_name, O_WRONLY | O_CREAT ) ||
-				carp "can't create $file_name $!" ;
-
-	syswrite( FH, join( '', @_ ) ) ;
-}
-
-sub orig_write_file
-{
-	my ($f, @data) = @_;
-
-	local(*F);
-
-	open(F, ">$f") || croak "open >$f: $!";
-	(print F @data) || croak "write $f: $!";
-	close(F) || croak "close $f: $!";
-	return 1;
-}
-
 
 #######################
 # top level subs for script
@@ -377,22 +369,27 @@ sub parse_options {
 sub legend {
 
 	die <<'LEGEND' ;
-k
-Key to Slurp/Spew Benchmarks
+Legend for the Slurp Benchmark Entries
 
+In all cases below 'FS' or 'F::S' means the current File::Slurp module
+is being used in the benchmark. The full name and description will say
+which options are being used.
 
-Write a list of lines to a file
+These benchmarks write a list of lines to a file. Use the direction option
+of 'out' or 'both' and the context option is 'list' or 'both'.
 
 	Key			Description/Source
 	---			------------------
-
-	FS:write_file		Current File::Slurp::write_file
-	FS:write_file_ref	Current File::Slurp::write_file (scalar ref)
-	print			Open a file and call print()
-	syswrite/join		Open a file, call syswrite on joined lines
-	sysopen/syswrite	Sysopen a file, call syswrite on joined lines
-	original write_file	Original (pre 9999.*) File::Slurp::write_file
-
+	FS::write_file		Current F::S write_file
+	FS::write_file Aref	Current F::S write_file on array ref of data
+	print			Open a file and call print() on the list data
+	print/join		Open a file and call print() on the joined
+				list data
+	syswrite/join		Open a file, call syswrite on joined list data
+	sysopen/syswrite	Sysopen a file, call syswrite on joined
+				list data
+	original write_file	write_file code from original File::Slurp
+				(pre-version 9999.*)
 
 LEGEND
 }
