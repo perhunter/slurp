@@ -11,7 +11,7 @@ use Fcntl qw( :DEFAULT :seek );
 
 use File::Slurp () ;
 
-my $file = 'slurp_data' ;
+my $file_name = 'slurp_data' ;
 my( @lines, $text ) ;
 
 my %opts ;
@@ -20,7 +20,7 @@ parse_options() ;
 
 run_benchmarks() ;
 
-unlink $file ;
+unlink $file_name ;
 
 exit ;
 
@@ -37,7 +37,7 @@ sub run_benchmarks {
 
 		if ( $opts{slurp} ) {
 
-			File::Slurp::write_file( $file, $text ) ;
+			File::Slurp::write_file( $file_name, $text ) ;
 
 			bench_list_slurp( $size ) if $opts{list} ;
 	 		bench_scalar_slurp( $size ) if $opts{scalar} ;
@@ -51,6 +51,8 @@ sub run_benchmarks {
 	}
 }
 
+##########################################
+
 sub bench_spew_list {
 
 	my( $size ) = @_ ;
@@ -58,18 +60,18 @@ sub bench_spew_list {
 	print "\n\nWriting (Spew) a list of lines: Size = $size bytes\n\n" ;
 
 	my $result = timethese( $opts{iterations}, {
- 		'FS::write_file' =>
- 	    		sub { File::Slurp::write_file( $file, @lines ) },
- 		'FS::write_file Aref' =>
- 	    		sub { File::Slurp::write_file( $file, \@lines ) },
-		'print' =>
-	    		sub { print_file( $file, @lines ) },
-		'print/join' =>
-			sub { print_join_file( $file, @lines ) },
-		'syswrite/join' =>
-			sub { syswrite_join_file( $file, @lines ) },
-		'original write_file' =>
-			sub { orig_write_file( $file, @lines ) },
+ 		'FS::write_file'	=> sub { unlink $file_name if $opts{unlink} ; 
+			File::Slurp::write_file( $file_name, @lines ) },
+ 		'FS::write_file Aref'	=> sub { unlink $file_name if $opts{unlink} ; 
+			File::Slurp::write_file( $file_name, \@lines ) },
+		'print'			=> sub { unlink $file_name if $opts{unlink} ; 
+			print_file( $file_name, @lines ) },
+		'print/join'		=> sub { unlink $file_name if $opts{unlink} ; 
+			print_join_file( $file_name, @lines ) },
+		'syswrite/join'		=> sub { unlink $file_name if $opts{unlink} ;
+			syswrite_join_file( $file_name, @lines ) },
+		'original write_file'	=> sub {  unlink $file_name if $opts{unlink} ; 
+			orig_write_file( $file_name, @lines ) },
 	} ) ;
 
 	cmpthese( $result ) ;
@@ -78,8 +80,6 @@ sub bench_spew_list {
 sub print_file {
 
 	my( $file_name ) = shift ;
-
-	unlink $file_name ;
 
 	local( *FH ) ;
 	open( FH, ">$file_name" ) || carp "can't create $file_name $!" ;
@@ -91,8 +91,6 @@ sub print_join_file {
 
 	my( $file_name ) = shift ;
 
-	unlink $file_name ;
-
 	local( *FH ) ;
 	open( FH, ">$file_name" ) || carp "can't create $file_name $!" ;
 
@@ -103,8 +101,6 @@ sub syswrite_join_file {
 
 	my( $file_name ) = shift ;
 
-	unlink $file_name ;
-
 	local( *FH ) ;
 	open( FH, ">$file_name" ) || carp "can't create $file_name $!" ;
 
@@ -114,8 +110,6 @@ sub syswrite_join_file {
 sub sysopen_syswrite_join_file {
 
 	my( $file_name ) = shift ;
-
-	unlink $file_name ;
 
 	local( *FH ) ;
 	sysopen( FH, $file_name, O_WRONLY | O_CREAT ) ||
@@ -128,8 +122,6 @@ sub orig_write_file
 {
 	my ($f, @data) = @_;
 
-	unlink $f ;
-
 	local(*F);
 
 	open(F, ">$f") || croak "open >$f: $!";
@@ -138,80 +130,95 @@ sub orig_write_file
 	return 1;
 }
 
-# sub bench_scalar_spew {
+##########################################
 
-# 	my ( $size ) = @_ ;
+sub bench_scalar_spew {
 
-# 	print "\n\nScalar Spew of $size file\n\n" ;
+	my ( $size ) = @_ ;
 
-# 	my $result = timethese( $dur, {
+	print "\n\nWriting (Spew) a scalar: Size = $size bytes\n\n" ;
 
-#  		new =>
-#  	    		sub { File::Slurp::write_file( $file, $text ) },
+	my $result = timethese( $opts{iterations}, {
+		'FS::write_file'	=> sub { unlink $file_name if $opts{unlink} ;
+			File::Slurp::write_file( $file_name, $text ) },
+		'FS::write_file Sref'	=> sub { unlink $file_name if $opts{unlink} ; 
+			File::Slurp::write_file( $file_name, \$text ) },
+		'print'			=> sub { unlink $file_name if $opts{unlink} ; 
+			print_file( $file_name, $text ) },
+		'syswrite_file'		=> sub { unlink $file_name if $opts{unlink} ; 
+			syswrite_file( $file_name, $text ) },
+		'syswrite_file_ref'	=> sub { unlink $file_name if $opts{unlink} ; 
+			syswrite_file_ref( $file_name, \$text ) },
+		'orig_write_file'	=> sub { unlink $file_name if $opts{unlink} ; 
+			orig_write_file( $file_name, $text ) },
+	} ) ;
 
-#  		new_ref =>
-#  	    		sub { File::Slurp::write_file( $file, \$text ) },
+	cmpthese( $result ) ;
+}
 
-# 		print_file =>
-# 	    		sub { print_file( $file, $text ) },
+sub syswrite_file {
 
-# 		print_join_file =>
-# 	    		sub { print_join_file( $file, $text ) },
+	my( $file_name, $text ) = @_ ;
 
-# 		syswrite_file =>
-# 	    		sub { syswrite_file( $file, $text ) },
+	local( *FH ) ;
+	open( FH, ">$file_name" ) || carp "can't create $file_name $!" ;
 
-# 		syswrite_file2 =>
-# 	    		sub { syswrite_file2( $file, $text ) },
+	syswrite( FH, $text ) ;
+}
 
-# 		orig_write_file =>
-# 			sub { orig_write_file( $file, $text ) },
+sub syswrite_file_ref {
 
-# 	} ) ;
+	my( $file_name, $text_ref ) = @_ ;
 
-# 	cmpthese( $result ) ;
-# }
+	local( *FH ) ;
+	open( FH, ">$file_name" ) || carp "can't create $file_name $!" ;
+
+	syswrite( FH, ${$text_ref} ) ;
+}
+
+#############################################
+
 
 # sub bench_scalar_slurp {
 
 # 	my ( $size ) = @_ ;
 
-# 	print "\n\nScalar Slurp of $size file\n\n" ;
+# 	print "\n\nScalar Slurp of $size bytes\n\n" ;
 
 # 	my $buffer ;
 
 # 	my $result = timethese( $dur, {
 
 # 		new =>
-# 	    		sub { my $text = File::Slurp::read_file( $file ) },
+# 	    		sub { my $text = File::Slurp::read_file( $file_name ) },
 
 # 		new_buf_ref =>
 # 	    		sub { my $text ;
-# 			   File::Slurp::read_file( $file, buf_ref => \$text ) },
+# 			   File::Slurp::read_file( $file_name, buf_ref => \$text ) },
 # 		new_buf_ref2 =>
 # 	    		sub { 
-# 			   File::Slurp::read_file( $file, buf_ref => \$buffer ) },
+# 			   File::Slurp::read_file( $file_name, buf_ref => \$buffer ) },
 # 		new_scalar_ref =>
 # 	    		sub { my $text =
-# 			    File::Slurp::read_file( $file, scalar_ref => 1 ) },
+# 			    File::Slurp::read_file( $file_name, scalar_ref => 1 ) },
 
 # 		read_file =>
-# 	    		sub { my $text = read_file( $file ) },
+# 	    		sub { my $text = read_file( $file_name ) },
 
 # 		sysread_file =>
-# 	    		sub { my $text = sysread_file( $file ) },
+# 	    		sub { my $text = sysread_file( $file_name ) },
 
 # 		orig_read_file =>
-# 			sub { my $text = orig_read_file( $file ) },
+# 			sub { my $text = orig_read_file( $file_name ) },
 
 # 		'Slurp.pm scalar' =>
-# 			sub { my $text = slurp_scalar( $file ) },
+# 			sub { my $text = slurp_scalar( $file_name ) },
 
 # 		file_contents =>
-# 			sub { my $text = file_contents( $file ) },
+# 			sub { my $text = file_contents( $file_name ) },
 
 # 		file_contents_no_OO =>
-# 			sub { my $text = file_contents_no_OO( $file ) },
+# 			sub { my $text = file_contents_no_OO( $file_name ) },
 # 	} ) ;
 
 # 	cmpthese( $result ) ;
@@ -226,30 +233,30 @@ sub orig_write_file
 # 	my $result = timethese( $dur, {
 
 # 		new =>
-# 	    		sub { my @lines = File::Slurp::read_file( $file ) },
+# 	    		sub { my @lines = File::Slurp::read_file( $file_name ) },
 
 # 		new_array_ref =>
 # 	    		sub { my $lines_ref =
-# 			     File::Slurp::read_file( $file, array_ref => 1 ) },
+# 			     File::Slurp::read_file( $file_name, array_ref => 1 ) },
 
 # 		new_in_anon_array =>
 # 	    		sub { my $lines_ref =
-# 			     [ File::Slurp::read_file( $file ) ] },
+# 			     [ File::Slurp::read_file( $file_name ) ] },
 
 # 		read_file =>
-# 	    		sub { my @lines = read_file( $file ) },
+# 	    		sub { my @lines = read_file( $file_name ) },
 
 # 		sysread_file =>
-# 	    		sub { my @lines = sysread_file( $file ) },
+# 	    		sub { my @lines = sysread_file( $file_name ) },
 
 # 		orig_read_file =>
-# 			sub { my @lines = orig_read_file( $file ) },
+# 			sub { my @lines = orig_read_file( $file_name ) },
 
 # 		'Slurp.pm to array' =>
-# 			sub { my @lines = slurp_array( $file ) },
+# 			sub { my @lines = slurp_array( $file_name ) },
 
 # 		orig_slurp_to_array_ref =>
-# 			sub { my $lines_ref = orig_slurp_to_array( $file ) },
+# 			sub { my $lines_ref = orig_slurp_to_array( $file_name ) },
 # 	} ) ;
 
 # 	cmpthese( $result ) ;
@@ -274,6 +281,7 @@ sub parse_options {
 		direction|d=s
 		context|c=s
 		sizes|s=s
+		unlink|u
 		legend|key|l|k
 		help|usage
 	) ) ;
@@ -391,6 +399,55 @@ of 'out' or 'both' and the context option is 'list' or 'both'.
 	original write_file	write_file code from original File::Slurp
 				(pre-version 9999.*)
 
+These benchmarks write a scalar to a file. Use the direction option
+of 'out' or 'both' and the context option is 'scalar' or 'both'.
+
+	Key			Description/Source
+	---			------------------
+	FS::write_file		Current F::S write_file
+	FS::write_file Sref	Current F::S write_file of scalar ref of data
+	print			Open a file and call print() on the scalar data
+	syswrite_file		Open a file, call syswrite on scalar data
+	syswrite_file_ref	Open a file, call syswrite on scalar ref of data
+	orig_write_file		write_file code from original File::Slurp
+				(pre-version 9999.*)
+
+These benchmarks slurp a file into an array. Use the direction option
+of 'in' or 'both' and the context option is 'list' or 'both'.
+
+FIX THIS
+
+	Key			Description/Source
+	---			------------------
+	FS::write_file		Current F::S write_file
+	FS::write_file Aref	Current F::S write_file on array ref of data
+	print			Open a file and call print() on the list data
+	print/join		Open a file and call print() on the joined
+				list data
+	syswrite/join		Open a file, call syswrite on joined list data
+	sysopen/syswrite	Sysopen a file, call syswrite on joined
+				list data
+	original write_file	write_file code from original File::Slurp
+				(pre-version 9999.*)
+
+These benchmarks slurp a file into a scalar. Use the direction option
+of 'in' or 'both' and the context option is 'scalar' or 'both'.
+
+FIX THIS
+
+	Key			Description/Source
+	---			------------------
+	FS::write_file		Current F::S write_file
+	FS::write_file Aref	Current F::S write_file on array ref of data
+	print			Open a file and call print() on the list data
+	print/join		Open a file and call print() on the joined
+				list data
+	syswrite/join		Open a file, call syswrite on joined list data
+	sysopen/syswrite	Sysopen a file, call syswrite on joined
+				list data
+	original write_file	write_file code from original File::Slurp
+				(pre-version 9999.*)
+
 LEGEND
 }
 
@@ -421,6 +478,9 @@ Usage: $0 [--iterations=<iter>] [--direction=<dir>] [--context=<con>]
 				integers. You can use 'k' or 'm' as suffixes
 				for 1024 and 1024**2. Default is '500,1k,1m'.
 
+	--unlink		Unlink the written file before each time
+	-u			a file is written
+
 	--legend		Print out a legend of all the benchmark entries.
 	--key
 	-l
@@ -435,39 +495,6 @@ DIE
 __END__
 
 
-sub bench_scalar_spew {
-
-	my ( $size ) = @_ ;
-
-	print "\n\nScalar Spew of $size file\n\n" ;
-
-	my $result = timethese( $dur, {
-
- 		new =>
- 	    		sub { File::Slurp::write_file( $file, $text ) },
-
- 		new_ref =>
- 	    		sub { File::Slurp::write_file( $file, \$text ) },
-
-		print_file =>
-	    		sub { print_file( $file, $text ) },
-
-		print_join_file =>
-	    		sub { print_join_file( $file, $text ) },
-
-		syswrite_file =>
-	    		sub { syswrite_file( $file, $text ) },
-
-		syswrite_file2 =>
-	    		sub { syswrite_file2( $file, $text ) },
-
-		orig_write_file =>
-			sub { orig_write_file( $file, $text ) },
-
-	} ) ;
-
-	cmpthese( $result ) ;
-}
 
 sub bench_scalar_slurp {
 
@@ -480,35 +507,35 @@ sub bench_scalar_slurp {
 	my $result = timethese( $dur, {
 
 		new =>
-	    		sub { my $text = File::Slurp::read_file( $file ) },
+	    		sub { my $text = File::Slurp::read_file( $file_name ) },
 
 		new_buf_ref =>
 	    		sub { my $text ;
-			   File::Slurp::read_file( $file, buf_ref => \$text ) },
+			   File::Slurp::read_file( $file_name, buf_ref => \$text ) },
 		new_buf_ref2 =>
 	    		sub { 
-			   File::Slurp::read_file( $file, buf_ref => \$buffer ) },
+			   File::Slurp::read_file( $file_name, buf_ref => \$buffer ) },
 		new_scalar_ref =>
 	    		sub { my $text =
-			    File::Slurp::read_file( $file, scalar_ref => 1 ) },
+			    File::Slurp::read_file( $file_name, scalar_ref => 1 ) },
 
 		read_file =>
-	    		sub { my $text = read_file( $file ) },
+	    		sub { my $text = read_file( $file_name ) },
 
 		sysread_file =>
-	    		sub { my $text = sysread_file( $file ) },
+	    		sub { my $text = sysread_file( $file_name ) },
 
 		orig_read_file =>
-			sub { my $text = orig_read_file( $file ) },
+			sub { my $text = orig_read_file( $file_name ) },
 
 		orig_slurp =>
-			sub { my $text = orig_slurp_to_scalar( $file ) },
+			sub { my $text = orig_slurp_to_scalar( $file_name ) },
 
 		file_contents =>
-			sub { my $text = file_contents( $file ) },
+			sub { my $text = file_contents( $file_name ) },
 
 		file_contents_no_OO =>
-			sub { my $text = file_contents_no_OO( $file ) },
+			sub { my $text = file_contents_no_OO( $file_name ) },
 	} ) ;
 
 	cmpthese( $result ) ;
@@ -523,30 +550,30 @@ sub bench_list_slurp {
 	my $result = timethese( $dur, {
 
 		new =>
-	    		sub { my @lines = File::Slurp::read_file( $file ) },
+	    		sub { my @lines = File::Slurp::read_file( $file_name ) },
 
 		new_array_ref =>
 	    		sub { my $lines_ref =
-			     File::Slurp::read_file( $file, array_ref => 1 ) },
+			     File::Slurp::read_file( $file_name, array_ref => 1 ) },
 
 		new_in_anon_array =>
 	    		sub { my $lines_ref =
-			     [ File::Slurp::read_file( $file ) ] },
+			     [ File::Slurp::read_file( $file_name ) ] },
 
 		read_file =>
-	    		sub { my @lines = read_file( $file ) },
+	    		sub { my @lines = read_file( $file_name ) },
 
 		sysread_file =>
-	    		sub { my @lines = sysread_file( $file ) },
+	    		sub { my @lines = sysread_file( $file_name ) },
 
 		orig_read_file =>
-			sub { my @lines = orig_read_file( $file ) },
+			sub { my @lines = orig_read_file( $file_name ) },
 
 		orig_slurp_to_array =>
-			sub { my @lines = orig_slurp_to_array( $file ) },
+			sub { my @lines = orig_slurp_to_array( $file_name ) },
 
 		orig_slurp_to_array_ref =>
-			sub { my $lines_ref = orig_slurp_to_array( $file ) },
+			sub { my $lines_ref = orig_slurp_to_array( $file_name ) },
 	} ) ;
 
 	cmpthese( $result ) ;
