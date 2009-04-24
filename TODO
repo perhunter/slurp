@@ -24,4 +24,16 @@ restart sysread/write after a signal (or check i/o count)
 
 fix SEEK stuff
 
+sent in patches:
+
+check for objects/refs to filenames
+
+add chmod mode to write_file
+
+add perms (same as chmod?) to syswrite
+
+check result of rename in atomic mode
+
+
+
 
