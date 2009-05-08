@@ -1,11 +1,24 @@
 package File::Slurp;
 
+my $printed ;
+
 use strict;
 
 use Carp ;
-use POSIX qw( :fcntl_h ) ;
 use Fcntl qw( :DEFAULT ) ;
+use POSIX qw( :fcntl_h ) ;
 use Symbol ;
+
+use base 'Exporter' ;
+use vars qw( %EXPORT_TAGS @EXPORT_OK $VERSION @EXPORT ) ;
+
+%EXPORT_TAGS = ( 'all' => [
+	qw( read_file write_file overwrite_file append_file read_dir ) ] ) ;
+
+@EXPORT = ( @{ $EXPORT_TAGS{'all'} } );
+@EXPORT_OK = qw( slurp ) ;
+
+$VERSION = '9999.13';
 
 my $is_win32 = $^O =~ /win32/i ;
 
@@ -57,22 +70,45 @@ BEGIN {
 # print "O_CREAT   ", O_CREAT(), "\n" ;
 # print "O_EXCL   ", O_EXCL(), "\n" ;
 
-use base 'Exporter' ;
-use vars qw( %EXPORT_TAGS @EXPORT_OK $VERSION @EXPORT ) ;
-
-%EXPORT_TAGS = ( 'all' => [
-	qw( read_file write_file overwrite_file append_file read_dir ) ] ) ;
-
-@EXPORT = ( @{ $EXPORT_TAGS{'all'} } );
-@EXPORT_OK = qw( slurp ) ;
-
-$VERSION = '9999.12';
 
 *slurp = \&read_file ;
 
 sub read_file {
 
 	my( $file_name, %args ) = @_ ;
+
+#	my $file_size = -s $file_name ;
+
+	if ( !ref $file_name && -s $file_name < 10000 && ! %args && !wantarray ) {
+
+		local( *FH ) ;
+
+#		open( FH, $file_name ) ;
+
+		unless( open( FH, $file_name ) ) {
+
+			@_ = ( \%args, "read_file '$file_name' - sysopen: $!");
+			goto &_error ;
+		}
+
+#print "OPT\n" and $printed++ unless $printed ;
+
+# 		sysread( FH, my $buf, -s _ ) ;
+# 		return $buf ;
+
+# 	}
+		my $read_cnt = sysread( FH, my $buf, -s _ ) ;
+
+		unless ( defined $read_cnt ) {
+
+# handle the read error
+
+			@_ = ( \%args, "read_file '$file_name' - sysread: $!");
+			goto &_error ;
+		}
+
+		return $buf ;
+	}
 
 # set the buffer to either the passed in one or ours and init it to the null
 # string
@@ -142,11 +178,33 @@ ERR
 
 		$size_left = -s $read_fh ;
 
-		unless( $size_left ) {
+### TEST
+# blk_size is not needed if we have a real file size > 0. for 0 size who cares?
+# so test this deletion
+###
+# 		unless( $size_left ) {
 
-			$blk_size = $args{'blk_size'} || 1024 * 1024 ;
-			$size_left = $blk_size ;
+# 			$blk_size = $args{'blk_size'} || 1024 * 1024 ;
+# 			$size_left = $blk_size ;
+# 		}
+	}
+
+
+	if ( $size_left < 10000 && keys %args == 0 && !wantarray ) {
+
+#print "OPT\n" and $printed++ unless $printed ;
+
+		my $read_cnt = sysread( $read_fh, my $buf, $size_left ) ;
+
+		unless ( defined $read_cnt ) {
+
+# handle the read error
+
+			@_ = ( \%args, "read_file '$file_name' - sysread: $!");
+			goto &_error ;
 		}
+
+		return $buf ;
 	}
 
 # infinite read loop. we exit when we are done slurping
@@ -158,26 +216,26 @@ ERR
 		my $read_cnt = sysread( $read_fh, ${$buf_ref},
 				$size_left, length ${$buf_ref} ) ;
 
-		if ( defined $read_cnt ) {
-
-# good read. see if we hit EOF (nothing left to read)
-
-			last if $read_cnt == 0 ;
-
-# loop if we are slurping a handle. we don't track $size_left then.
-
-			next if $blk_size ;
-
-# count down how much we read and loop if we have more to read.
-			$size_left -= $read_cnt ;
-			last if $size_left <= 0 ;
-			next ;
-		}
+		unless ( defined $read_cnt ) {
 
 # handle the read error
 
-		@_ = ( \%args, "read_file '$file_name' - sysread: $!");
-		goto &_error ;
+			@_ = ( \%args, "read_file '$file_name' - sysread: $!");
+			goto &_error ;
+		}
+
+# good read. see if we hit EOF (nothing left to read)
+
+		last if $read_cnt == 0 ;
+
+# loop if we are slurping a handle. we don't track $size_left then.
+
+		next if $blk_size ;
+
+# count down how much we read and loop if we have more to read.
+
+		$size_left -= $read_cnt ;
+		last if $size_left <= 0 ;
 	}
 
 # fix up cr/lf to be a newline if this is a windows text file
@@ -354,7 +412,12 @@ sub write_file {
 
 # handle the atomic mode - move the temp file to the original filename.
 
-	rename( $file_name, $orig_file_name ) if $args->{'atomic'} ;
+	if ( $args->{'atomic'} && !rename( $file_name, $orig_file_name ) ) {
+
+
+		@_ = ( $args, "write_file '$file_name' - rename: $!" ) ;
+		goto &_error ;
+	}
 
 	return 1 ;
 }
