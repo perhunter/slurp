@@ -10,6 +10,7 @@ use FileHandle ;
 use Fcntl qw( :DEFAULT :seek );
 
 use File::Slurp () ;
+use FileSlurp_12 () ;
 
 my $file_name = 'slurp_data' ;
 my( @lines, $text ) ;
@@ -51,6 +52,190 @@ sub run_benchmarks {
 	}
 }
 
+##########################################
+##########################################
+sub bench_scalar_slurp {
+
+	my ( $size ) = @_ ;
+
+	print "\n\nReading (Slurp) into a scalar: Size = $size bytes\n\n" ;
+
+	my $buffer ;
+
+	my $result = timethese( $opts{iterations}, {
+
+		'FS::read_file' =>
+	    		sub { my $text = File::Slurp::read_file( $file_name ) },
+
+		'FS12::read_file' =>
+	    		sub { my $text = FileSlurp_12::read_file( $file_name ) },
+
+# 		'FS::read_file_buf_ref' =>
+# 	    		sub { my $text ;
+# 			   File::Slurp::read_file( $file_name, buf_ref => \$text ) },
+# 		'FS::read_file_buf_ref2' =>
+# 	    		sub { 
+# 			   File::Slurp::read_file( $file_name, buf_ref => \$buffer ) },
+# 		'FS::read_file_scalar_ref' =>
+# 	    		sub { my $text =
+# 			    File::Slurp::read_file( $file_name, scalar_ref => 1 ) },
+
+		old_sysread_file =>
+	    		sub { my $text = old_sysread_file( $file_name ) },
+
+		old_read_file =>
+	    		sub { my $text = old_read_file( $file_name ) },
+
+		orig_read_file =>
+			sub { my $text = orig_read_file( $file_name ) },
+
+		orig_slurp =>
+			sub { my $text = orig_slurp_scalar( $file_name ) },
+
+		file_contents =>
+			sub { my $text = file_contents( $file_name ) },
+
+		file_contents_no_OO =>
+			sub { my $text = file_contents_no_OO( $file_name ) },
+	} ) ;
+
+	cmpthese( $result ) ;
+}
+
+##########################################
+
+sub bench_list_slurp {
+
+	my ( $size ) = @_ ;
+
+	print "\n\nReading (Slurp) into a list: Size = $size bytes\n\n" ;
+
+	my $result = timethese( $opts{iterations},  {
+
+		'FS::read_file' =>
+	    		sub { my @lines = File::Slurp::read_file( $file_name ) },
+
+		'FS::read_file_array_ref' =>
+	    		sub { my $lines_ref =
+			     File::Slurp::read_file( $file_name, array_ref => 1 ) },
+
+		'FS::read_file_scalar' =>
+	    		sub { my $lines_ref =
+			     [ File::Slurp::read_file( $file_name ) ] },
+
+		old_sysread_file =>
+	    		sub { my @lines = old_sysread_file( $file_name ) },
+
+		old_read_file =>
+	    		sub { my @lines = old_read_file( $file_name ) },
+
+		orig_read_file =>
+			sub { my @lines = orig_read_file( $file_name ) },
+
+		orig_slurp_array =>
+			sub { my @lines = orig_slurp_array( $file_name ) },
+
+		orig_slurp_array_ref =>
+			sub { my $lines_ref = orig_slurp_array( $file_name ) },
+	} ) ;
+
+	cmpthese( $result ) ;
+}
+
+######################################
+# uri's old fast slurp
+
+sub old_read_file {
+
+	my( $file_name ) = shift ;
+
+	local( *FH ) ;
+	open( FH, $file_name ) || carp "can't open $file_name $!" ;
+
+	return <FH> if wantarray ;
+
+	my $buf ;
+
+	read( FH, $buf, -s FH ) ;
+	return $buf ;
+}
+
+sub old_sysread_file {
+
+	my( $file_name ) = shift ;
+
+	local( *FH ) ;
+	open( FH, $file_name ) || carp "can't open $file_name $!" ;
+
+	return <FH> if wantarray ;
+
+	my $buf ;
+
+	sysread( FH, $buf, -s FH ) ;
+	return $buf ;
+}
+
+######################################
+# from File::Slurp.pm on cpan
+
+sub orig_read_file
+{
+	my ($file) = @_;
+
+	local($/) = wantarray ? $/ : undef;
+	local(*F);
+	my $r;
+	my (@r);
+
+	open(F, "<$file") || croak "open $file: $!";
+	@r = <F>;
+	close(F) || croak "close $file: $!";
+
+	return $r[0] unless wantarray;
+	return @r;
+}
+
+
+######################################
+# from Slurp.pm on cpan
+
+sub orig_slurp { 
+    local( $/, @ARGV ) = ( wantarray ? $/ : undef, @_ ); 
+    return <ARGV>;
+}
+
+sub orig_slurp_array {
+    my @array = orig_slurp( @_ );
+    return wantarray ? @array : \@array;
+}
+
+sub orig_slurp_scalar {
+    my $scalar = orig_slurp( @_ );
+    return $scalar;
+}
+
+######################################
+# very slow slurp code used by a client
+
+sub file_contents {
+    my $file = shift;
+    my $fh = new FileHandle $file or
+        warn("Util::file_contents:Can't open file $file"), return '';
+    return join '', <$fh>;
+}
+
+# same code but doesn't use FileHandle.pm
+
+sub file_contents_no_OO {
+    my $file = shift;
+
+	local( *FH ) ;
+	open( FH, $file ) || carp "can't open $file $!" ;
+
+    return join '', <FH>;
+}
+
+##########################################
 ##########################################
 
 sub bench_spew_list {
@@ -176,104 +361,6 @@ sub syswrite_file_ref {
 	syswrite( FH, ${$text_ref} ) ;
 }
 
-#############################################
-
-
-# sub bench_scalar_slurp {
-
-# 	my ( $size ) = @_ ;
-
-# 	print "\n\nScalar Slurp of $size bytes\n\n" ;
-
-# 	my $buffer ;
-
-# 	my $result = timethese( $dur, {
-
-# 		new =>
-# 	    		sub { my $text = File::Slurp::read_file( $file_name ) },
-
-# 		new_buf_ref =>
-# 	    		sub { my $text ;
-# 			   File::Slurp::read_file( $file_name, buf_ref => \$text ) },
-# 		new_buf_ref2 =>
-# 	    		sub { 
-# 			   File::Slurp::read_file( $file_name, buf_ref => \$buffer ) },
-# 		new_scalar_ref =>
-# 	    		sub { my $text =
-# 			    File::Slurp::read_file( $file_name, scalar_ref => 1 ) },
-
-# 		read_file =>
-# 	    		sub { my $text = read_file( $file_name ) },
-
-# 		sysread_file =>
-# 	    		sub { my $text = sysread_file( $file_name ) },
-
-# 		orig_read_file =>
-# 			sub { my $text = orig_read_file( $file_name ) },
-
-# 		'Slurp.pm scalar' =>
-# 			sub { my $text = slurp_scalar( $file_name ) },
-
-# 		file_contents =>
-# 			sub { my $text = file_contents( $file_name ) },
-
-# 		file_contents_no_OO =>
-# 			sub { my $text = file_contents_no_OO( $file_name ) },
-# 	} ) ;
-
-# 	cmpthese( $result ) ;
-# }
-
-# sub bench_list_slurp {
-
-# 	my ( $size ) = @_ ;
-
-# 	print "\n\nList Slurp of $size file\n\n" ;
-
-# 	my $result = timethese( $dur, {
-
-# 		new =>
-# 	    		sub { my @lines = File::Slurp::read_file( $file_name ) },
-
-# 		new_array_ref =>
-# 	    		sub { my $lines_ref =
-# 			     File::Slurp::read_file( $file_name, array_ref => 1 ) },
-
-# 		new_in_anon_array =>
-# 	    		sub { my $lines_ref =
-# 			     [ File::Slurp::read_file( $file_name ) ] },
-
-# 		read_file =>
-# 	    		sub { my @lines = read_file( $file_name ) },
-
-# 		sysread_file =>
-# 	    		sub { my @lines = sysread_file( $file_name ) },
-
-# 		orig_read_file =>
-# 			sub { my @lines = orig_read_file( $file_name ) },
-
-# 		'Slurp.pm to array' =>
-# 			sub { my @lines = slurp_array( $file_name ) },
-
-# 		orig_slurp_to_array_ref =>
-# 			sub { my $lines_ref = orig_slurp_to_array( $file_name ) },
-# 	} ) ;
-
-# 	cmpthese( $result ) ;
-# }
-
-
-###########################
-# write file benchmark subs
-###########################
-
-
-
-#######################
-# top level subs for script
-
-#######################
-
 sub parse_options {
 
 	my $result = GetOptions (\%opts, qw(
@@ -377,77 +464,81 @@ sub parse_options {
 sub legend {
 
 	die <<'LEGEND' ;
+--------------------------------------------------------------------------
 Legend for the Slurp Benchmark Entries
 
 In all cases below 'FS' or 'F::S' means the current File::Slurp module
 is being used in the benchmark. The full name and description will say
 which options are being used.
-
+--------------------------------------------------------------------------
 These benchmarks write a list of lines to a file. Use the direction option
 of 'out' or 'both' and the context option is 'list' or 'both'.
 
 	Key			Description/Source
-	---			------------------
+	-----			--------------------------
 	FS::write_file		Current F::S write_file
 	FS::write_file Aref	Current F::S write_file on array ref of data
 	print			Open a file and call print() on the list data
-	print/join		Open a file and call print() on the joined
-				list data
+	print/join		Open a file and call print() on the joined list
+				data
 	syswrite/join		Open a file, call syswrite on joined list data
-	sysopen/syswrite	Sysopen a file, call syswrite on joined
-				list data
+	sysopen/syswrite	Sysopen a file, call syswrite on joined list
+				data
 	original write_file	write_file code from original File::Slurp
 				(pre-version 9999.*)
-
+--------------------------------------------------------------------------
 These benchmarks write a scalar to a file. Use the direction option
 of 'out' or 'both' and the context option is 'scalar' or 'both'.
 
 	Key			Description/Source
-	---			------------------
+	-----			--------------------------
 	FS::write_file		Current F::S write_file
 	FS::write_file Sref	Current F::S write_file of scalar ref of data
 	print			Open a file and call print() on the scalar data
 	syswrite_file		Open a file, call syswrite on scalar data
-	syswrite_file_ref	Open a file, call syswrite on scalar ref of data
+	syswrite_file_ref	Open a file, call syswrite on scalar ref of
+				data
 	orig_write_file		write_file code from original File::Slurp
 				(pre-version 9999.*)
-
+--------------------------------------------------------------------------
 These benchmarks slurp a file into an array. Use the direction option
 of 'in' or 'both' and the context option is 'list' or 'both'.
 
-FIX THIS
-
-	Key			Description/Source
-	---			------------------
-	FS::write_file		Current F::S write_file
-	FS::write_file Aref	Current F::S write_file on array ref of data
-	print			Open a file and call print() on the list data
-	print/join		Open a file and call print() on the joined
-				list data
-	syswrite/join		Open a file, call syswrite on joined list data
-	sysopen/syswrite	Sysopen a file, call syswrite on joined
-				list data
-	original write_file	write_file code from original File::Slurp
-				(pre-version 9999.*)
-
+	Key				Description/Source
+	-----				--------------------------
+	FS::read_file			Current F::S read_file - returns array
+	FS::read_file_array_ref		Current F::S read_file - returns array
+					ref in any context
+	FS::read_file_scalar		Current F::S read_file - returns array
+					ref in scalar context
+	old_sysread_file		My old fast slurp - calls sysread
+	old_read_file			My old fast slurp - calls read
+	orig_read_file			Original File::Slurp on CPAN 
+	orig_slurp_array		Slurp.pm on CPAN - returns array
+	orig_slurp_array_ref		Slurp.pm on CPAN - returns array ref
+--------------------------------------------------------------------------
 These benchmarks slurp a file into a scalar. Use the direction option
 of 'in' or 'both' and the context option is 'scalar' or 'both'.
 
-FIX THIS
-
-	Key			Description/Source
-	---			------------------
-	FS::write_file		Current F::S write_file
-	FS::write_file Aref	Current F::S write_file on array ref of data
-	print			Open a file and call print() on the list data
-	print/join		Open a file and call print() on the joined
-				list data
-	syswrite/join		Open a file, call syswrite on joined list data
-	sysopen/syswrite	Sysopen a file, call syswrite on joined
-				list data
-	original write_file	write_file code from original File::Slurp
-				(pre-version 9999.*)
-
+	Key				Description/Source
+	-----				--------------------------
+	FS::read_file			Current F::S read_file - returns scalar
+	FS12::read_file			F::S .12 slower read_file -
+					returns scalar
+	FS::read_file_buf_ref		Current F::S read_file - returns
+					via buf_ref argument - new buffer
+	FS::read_file_buf_ref2		Current F::S read_file - returns
+					via buf_ref argument - uses
+					existing buffer
+	FS::read_file_scalar_ref	Current F::S read_file - returns a 
+					scalar ref
+	old_sysread_file		My old fast slurp - calls sysread
+	old_read_file			My old fast slurp - calls read
+	orig_read_file			Original File::Slurp on CPAN 
+	orig_slurp			Slurp.pm on CPAN
+	file_contents			Very slow slurp code done by a client
+	file_contents_no_OO		Same code but doesn't use FileHandle.pm 
+--------------------------------------------------------------------------
 LEGEND
 }
 
@@ -494,182 +585,3 @@ DIE
 
 __END__
 
-
-
-sub bench_scalar_slurp {
-
-	my ( $size ) = @_ ;
-
-	print "\n\nScalar Slurp of $size file\n\n" ;
-
-	my $buffer ;
-
-	my $result = timethese( $dur, {
-
-		new =>
-	    		sub { my $text = File::Slurp::read_file( $file_name ) },
-
-		new_buf_ref =>
-	    		sub { my $text ;
-			   File::Slurp::read_file( $file_name, buf_ref => \$text ) },
-		new_buf_ref2 =>
-	    		sub { 
-			   File::Slurp::read_file( $file_name, buf_ref => \$buffer ) },
-		new_scalar_ref =>
-	    		sub { my $text =
-			    File::Slurp::read_file( $file_name, scalar_ref => 1 ) },
-
-		read_file =>
-	    		sub { my $text = read_file( $file_name ) },
-
-		sysread_file =>
-	    		sub { my $text = sysread_file( $file_name ) },
-
-		orig_read_file =>
-			sub { my $text = orig_read_file( $file_name ) },
-
-		orig_slurp =>
-			sub { my $text = orig_slurp_to_scalar( $file_name ) },
-
-		file_contents =>
-			sub { my $text = file_contents( $file_name ) },
-
-		file_contents_no_OO =>
-			sub { my $text = file_contents_no_OO( $file_name ) },
-	} ) ;
-
-	cmpthese( $result ) ;
-}
-
-sub bench_list_slurp {
-
-	my ( $size ) = @_ ;
-
-	print "\n\nList Slurp of $size file\n\n" ;
-
-	my $result = timethese( $dur, {
-
-		new =>
-	    		sub { my @lines = File::Slurp::read_file( $file_name ) },
-
-		new_array_ref =>
-	    		sub { my $lines_ref =
-			     File::Slurp::read_file( $file_name, array_ref => 1 ) },
-
-		new_in_anon_array =>
-	    		sub { my $lines_ref =
-			     [ File::Slurp::read_file( $file_name ) ] },
-
-		read_file =>
-	    		sub { my @lines = read_file( $file_name ) },
-
-		sysread_file =>
-	    		sub { my @lines = sysread_file( $file_name ) },
-
-		orig_read_file =>
-			sub { my @lines = orig_read_file( $file_name ) },
-
-		orig_slurp_to_array =>
-			sub { my @lines = orig_slurp_to_array( $file_name ) },
-
-		orig_slurp_to_array_ref =>
-			sub { my $lines_ref = orig_slurp_to_array( $file_name ) },
-	} ) ;
-
-	cmpthese( $result ) ;
-}
-
-######################################
-# uri's old fast slurp
-
-sub read_file {
-
-	my( $file_name ) = shift ;
-
-	local( *FH ) ;
-	open( FH, $file_name ) || carp "can't open $file_name $!" ;
-
-	return <FH> if wantarray ;
-
-	my $buf ;
-
-	read( FH, $buf, -s FH ) ;
-	return $buf ;
-}
-
-sub sysread_file {
-
-	my( $file_name ) = shift ;
-
-	local( *FH ) ;
-	open( FH, $file_name ) || carp "can't open $file_name $!" ;
-
-	return <FH> if wantarray ;
-
-	my $buf ;
-
-	sysread( FH, $buf, -s FH ) ;
-	return $buf ;
-}
-
-######################################
-# from File::Slurp.pm on cpan
-
-sub orig_read_file
-{
-	my ($file) = @_;
-
-	local($/) = wantarray ? $/ : undef;
-	local(*F);
-	my $r;
-	my (@r);
-
-	open(F, "<$file") || croak "open $file: $!";
-	@r = <F>;
-	close(F) || croak "close $file: $!";
-
-	return $r[0] unless wantarray;
-	return @r;
-}
-
-
-######################################
-# from Slurp.pm on cpan
-
-sub slurp { 
-    local( $/, @ARGV ) = ( wantarray ? $/ : undef, @_ ); 
-    return <ARGV>;
-}
-
-sub slurp_array {
-    my @array = slurp( @_ );
-    return wantarray ? @array : \@array;
-}
-
-sub slurp_scalar {
-    my $scalar = slurp( @_ );
-    return $scalar;
-}
-
-######################################
-# very slow slurp code used by a client
-
-sub file_contents {
-    my $file = shift;
-    my $fh = new FileHandle $file or
-        warn("Util::file_contents:Can't open file $file"), return '';
-    return join '', <$fh>;
-}
-
-# same code but doesn't use FileHandle.pm
-
-sub file_contents_no_OO {
-    my $file = shift;
-
-	local( *FH ) ;
-	open( FH, $file ) || carp "can't open $file $!" ;
-
-    return join '', <FH>;
-}
-
-##########################

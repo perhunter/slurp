@@ -2,12 +2,10 @@
 
 use strict ;
 
+use File::Slurp ;
 use Test::More ;
 use Carp ;
 
-BEGIN{ 
-	use_ok( 'File::Slurp', ) ;
-}
 
 my $file = 'slurp.data' ;
 unlink $file ;

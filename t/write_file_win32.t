@@ -1,12 +1,9 @@
-use Test::More tests => 2 + 1;
 use strict;
+use File::Slurp ;
+
+use Test::More tests => 1;
+
 BEGIN { $^W = 1 }
-
-BEGIN {
-    require_ok('File::Slurp');
-    use_ok('File::Slurp', 'write_file');
-}
-
 
 sub simple_write_file {
     open my $fh, '>', $_[0] or die "Couldn't open $_[0] for write: $!";

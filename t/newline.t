@@ -1,12 +1,7 @@
-use Test::More tests => 2 + 2 ;
+use Test::More tests => 2 ;
 
 use strict;
-
-BEGIN {
-    require_ok( 'File::Slurp' ) ;
-    use_ok('File::Slurp', qw(write_file read_file) ) ;
-}
-
+use File::Slurp ;
 
 my $data = "\r\n\r\n\r\n" ;
 my $file_name = 'newline.txt' ;

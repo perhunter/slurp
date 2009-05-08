@@ -4,10 +4,7 @@ use strict ;
 
 use Test::More ;
 use Carp ;
-
-BEGIN{ 
-	use_ok( 'File::Slurp', ) ;
-}
+use File::Slurp ;
 
 my $file = 'slurp.data' ;
 unlink $file ;

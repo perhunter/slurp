@@ -4,6 +4,9 @@ Revision history for Perl extension File::FastSlurp.
 	- Refactored the extras/slurp_bench.pl script. It has options,
 	  a key the benchmarks, help and more benchmarks.
 	- Reordered changes so recent entries are first
+	- Added error check on atomic rename and test for it
+		Thanks to Daniel Scott Sterling
+
 
 9999.12   Thu Feb  2 02:26:31 EST 2006
 	- Fixed bug on windows with classic slurping and File::Slurp not

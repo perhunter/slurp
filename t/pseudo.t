@@ -2,16 +2,13 @@
 
 use strict ;
 
+use File::Slurp ;
 use Carp ;
 use Test::More ;
 
 plan( tests => 1 ) ; 
 
 my $proc_file = "/proc/$$/auxv" ;
-
-BEGIN{ 
-	use_ok( 'File::Slurp' ) ;
-}
 
 SKIP: {
 

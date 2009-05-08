@@ -1,12 +1,9 @@
 #!/usr/local/bin/perl -w
 
 use strict ;
+use File::Slurp qw( write_file slurp ) ;
 
-use Test::More tests => 2 ;
-
-BEGIN{ 
-	use_ok( 'File::Slurp', qw( write_file slurp ) ) ;
-}
+use Test::More tests => 1 ;
 
 my $data = <<TEXT ;
 line 1

@@ -1,12 +1,9 @@
 #!/usr/local/bin/perl -w
 
 use strict ;
+use File::Slurp ;
 
-use Test::More tests => 2 ;
-
-BEGIN{ 
-	use_ok( 'File::Slurp', qw( read_file write_file append_file ) ) ;
-}
+use Test::More tests => 1 ;
 
 my $data = <<TEXT ;
 line 1
@@ -23,6 +20,5 @@ append_file( $file, '' ) ;
 my $read_data = read_file( $file ) ;
 
 is( $data, $read_data ) ;
-
 
 unlink $file ;

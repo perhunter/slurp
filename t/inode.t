@@ -2,10 +2,13 @@
 
 use strict ;
 
+use File::Slurp ;
+
 use Carp ;
 use Socket ;
 use Symbol ;
 use Test::More ;
+
 
 BEGIN{ 
 
@@ -14,10 +17,8 @@ BEGIN{
 		exit ;
 	}
 	else {
-		plan tests => 3 ;
+		plan tests => 2 ;
 	}
-
-	use_ok( 'File::Slurp', ) ;
 }
 
 my $data = <<TEXT ;

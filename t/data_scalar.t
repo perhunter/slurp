@@ -1,20 +1,17 @@
 #!/usr/local/bin/perl -w
 
 use strict ;
+use File::Slurp ;
 
 use Carp ;
 use POSIX qw( :fcntl_h ) ;
-use Test::More tests => 2 ;
+use Test::More tests => 1 ;
 
 # in case SEEK_SET isn't defined in older perls. it seems to always be 0
 
 BEGIN {
 
-	*SEEK_SET = sub { 0 } unless eval { SEEK_SET() } ;
-}
-
-BEGIN{ 
-	use_ok( 'File::Slurp', ) ;
+	*SEEK_SET = sub { 0 } unless defined \&SEEK_SET ;
 }
 
 eval { require B } ;

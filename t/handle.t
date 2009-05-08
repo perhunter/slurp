@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl -w
 
 use strict ;
+use File::Slurp ;
 
 use Carp ;
 use POSIX qw( :fcntl_h ) ;
@@ -11,7 +12,7 @@ use Test::More ;
 # in case SEEK_SET isn't defined in older perls. it seems to always be 0
 
 BEGIN {
-	*SEEK_SET = sub { 0 } unless eval { SEEK_SET() } ;
+	*SEEK_SET = sub() { 0 } unless defined \&SEEK_SET ;
 }
 
 my @pipe_data = (
@@ -21,13 +22,7 @@ my @pipe_data = (
 	'abc' x 1_000_000,
 ) ;
 
-#plan( tests => 2 + @pipe_data ) ;
 plan( tests => scalar @pipe_data ) ;
-
-
-BEGIN{ 
-	use_ok( 'File::Slurp', )  ;
-}
 
 #test_data_slurp() ;
 

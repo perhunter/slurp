@@ -1,15 +1,12 @@
 #!/usr/local/bin/perl -w
 
 use strict ;
+use File::Slurp ;
 
 use Carp ;
 use Socket ;
 use Symbol ;
-use Test::More tests => 7 ;
-
-BEGIN{ 
-	use_ok( 'File::Slurp', ) ;
-}
+use Test::More tests => 6 ;
 
 my $data = <<TEXT ;
 line 1
