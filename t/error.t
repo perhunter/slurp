@@ -1,65 +1,74 @@
 ##!/usr/local/bin/perl -w
 
+use lib qw(t) ;
+
 use strict ;
+use File::Slurp qw( :all ) ;
 
-use Test::More ;
-use Carp ;
+use common ;
 
-BEGIN{ 
-	use_ok( 'File::Slurp', ) ;
-}
-use File::Slurp ;
+my $file_name = 'test_file' ;
+my $dir_name = 'test_dir' ;
 
+my $tests = [
 
-my $file = 'missing/file' ;
-unlink $file ;
+	{
+		name	=> 'read_file open error',
+		sub	=> \&read_file,
+		args	=> [ $file_name ],
 
-plan tests => 9 ;
+		error => qr/open/,
+	},
 
-my %modes = (
-	'croak' => \&test_croak,
-	'carp' => \&test_carp,
-	'quiet' => \&test_quiet,
-) ;
+	{
+		name	=> 'write_file open error',
+		sub	=> \&write_file,
+		args	=> [ "$dir_name/$file_name", '' ],
+		pretest => sub {
+			mkdir $dir_name ;
+			chmod( 0555, $dir_name ) ;
+		},
 
-while( my( $mode, $sub ) = each %modes ) {
+		posttest => sub {
 
-	$sub->( 'read_file', \&read_file, $file, err_mode => $mode ) ;
-	$sub->( 'write_file', \&write_file, $file,
-					{ err_mode => $mode }, 'junk' ) ;
-	$sub->( 'read_dir', \&read_dir, $file, err_mode => $mode ) ;
-}
+			chmod( 0777, $dir_name ) ;
+			rmdir $dir_name ;
+		},
 
+		error => qr/open/,
+	},
 
-sub test_croak {
+	{
+		name	=> 'atomic rename error',
+		sub	=> \&write_file,
+		args	=> [ "$dir_name/$file_name", { atomic => 1 }, '' ],
+		pretest => sub {
+			mkdir $dir_name ;
+			write_file( "$dir_name/$file_name.$$", '' ) ;
+			chmod( 0555, $dir_name ) ;
+		},
 
-	my ( $name, $sub, @args ) = @_ ;
+		posttest => sub {
 
-	eval {
-		$sub->( @args ) ;
-	} ;
+			chmod( 0777, $dir_name ) ;
+			unlink( "$dir_name/$file_name.$$" ) ;
+			rmdir $dir_name ;
+		},
 
-	ok( $@, "$name can croak" ) ;
-}
+		error => qr/rename/,
+	},
 
-sub test_carp {
+	{
+		name	=> 'read_dir open error',
+		sub	=> \&read_dir,
+		args	=> [ $dir_name ],
 
-	my ( $name, $sub, @args ) = @_ ;
+		error => qr/open/,
+	},
 
-	local $SIG{__WARN__} = sub { ok( 1, "$name can carp" ) } ;
+] ;
 
-	$sub->( @args ) ;
-}
+tester( $tests ) ;
 
-sub test_quiet {
+exit ;
 
-	my ( $name, $sub, @args ) = @_ ;
-
-	local $SIG{__WARN__} = sub { ok( 0, "$name can be quiet" ) } ;
-
-	eval {
-		$sub->( @args ) ;
-	} ;
-
-	ok( !$@, "$name can be quiet" ) ;
-}
