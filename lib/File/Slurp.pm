@@ -170,17 +170,17 @@ ERR
 
 		$size_left = -s $read_fh ;
 
-print "SIZE $size_left\n" ;
+#print "SIZE $size_left\n" ;
 
-### TEST
-# blk_size is not needed if we have a real file size > 0. for 0 size who cares?
-# so test this deletion
-###
-# 		unless( $size_left ) {
 
-# 			$blk_size = $args{'blk_size'} || 1024 * 1024 ;
-# 			$size_left = $blk_size ;
-# 		}
+# we need a blk_size if the size is 0 so we can handle pseudofiles like in
+# /proc. these show as 0 size but have data to be slurped.
+
+		unless( $size_left ) {
+
+			$blk_size = $args{'blk_size'} || 1024 * 1024 ;
+			$size_left = $blk_size ;
+		}
 	}
 
 
