@@ -1,11 +1,10 @@
 ##!/usr/local/bin/perl -w
 
 use lib qw(t) ;
-
 use strict ;
-use File::Slurp qw( :all ) ;
+use driver ;
 
-use common ;
+use File::Slurp qw( :all ) ;
 
 my $file_name = 'test_file' ;
 my $dir_name = 'test_dir' ;
@@ -18,6 +17,8 @@ my $tests = [
 		args	=> [ $file_name ],
 
 		error => qr/open/,
+
+		skip	=> 1,
 	},
 
 	{
@@ -36,6 +37,58 @@ my $tests = [
 		},
 
 		error => qr/open/,
+		skip	=> 1,
+	},
+
+	{
+		name	=> 'write_file syswrite error',
+		sub	=> \&write_file,
+		args	=> [ $file_name, '' ],
+		override	=> 'syswrite',
+
+		posttest => sub {
+			unlink( $file_name ) ;
+		},
+
+
+		error => qr/write/,
+		skip	=> 1,
+	},
+
+	{
+		name	=> 'read_file small sysread error',
+		sub	=> \&read_file,
+		args	=> [ $file_name ],
+		override	=> 'sysread',
+
+		pretest => sub {
+			write_file( $file_name, '' ) ;
+		},
+
+		posttest => sub {
+			unlink( $file_name ) ;
+		},
+
+
+		error => qr/read/,
+	},
+
+	{
+		name	=> 'read_file loop sysread error',
+		sub	=> \&read_file,
+		args	=> [ $file_name ],
+		override	=> 'sysread',
+
+		pretest => sub {
+			write_file( $file_name, 'x' x 100_000 ) ;
+		},
+
+		posttest => sub {
+			unlink( $file_name ) ;
+		},
+
+
+		error => qr/read/,
 	},
 
 	{
@@ -56,19 +109,20 @@ my $tests = [
 		},
 
 		error => qr/rename/,
+		skip	=> 1,
 	},
 
 	{
-		name	=> 'read_dir open error',
+		name	=> 'read_dir opendir error',
 		sub	=> \&read_dir,
 		args	=> [ $dir_name ],
 
 		error => qr/open/,
+		skip	=> 1,
 	},
-
 ] ;
 
-tester( $tests ) ;
+test_driver( $tests ) ;
 
 exit ;
 

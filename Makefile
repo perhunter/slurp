@@ -54,11 +54,11 @@ DIRFILESEP = /
 DFSEP = $(DIRFILESEP)
 NAME = File::Slurp
 NAME_SYM = File_Slurp
-VERSION = 9999.12
+VERSION = 9999.13
 VERSION_MACRO = VERSION
-VERSION_SYM = 9999_12
+VERSION_SYM = 9999_13
 DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
-XS_VERSION = 9999.12
+XS_VERSION = 9999.13
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
 INST_ARCHLIB = blib/arch
@@ -157,8 +157,7 @@ C_FILES  =
 O_FILES  = 
 H_FILES  = 
 MAN1PODS = 
-MAN3PODS = Slurp.pm \
-	lib/File/Slurp.pm
+MAN3PODS = lib/File/Slurp.pm
 
 # Where is the Config information that we are using/depend on
 CONFIGDEP = $(PERL_ARCHLIB)$(DFSEP)Config.pm $(PERL_INC)$(DFSEP)config.h
@@ -180,12 +179,9 @@ PERL_ARCHIVE       =
 PERL_ARCHIVE_AFTER = 
 
 
-TO_INST_PM = Slurp.pm \
-	lib/File/Slurp.pm
+TO_INST_PM = lib/File/Slurp.pm
 
-PM_TO_BLIB = Slurp.pm \
-	$(INST_LIB)/File/Slurp.pm \
-	lib/File/Slurp.pm \
+PM_TO_BLIB = lib/File/Slurp.pm \
 	blib/lib/File/Slurp.pm
 
 
@@ -253,7 +249,7 @@ RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
 DIST_CP = best
 DIST_DEFAULT = tardist
 DISTNAME = File-Slurp
-DISTVNAME = File-Slurp-9999.12
+DISTVNAME = File-Slurp-9999.13
 
 
 # --- MakeMaker macro section:
@@ -406,10 +402,8 @@ POD2MAN = $(POD2MAN_EXE)
 
 
 manifypods : pure_all  \
-	Slurp.pm \
 	lib/File/Slurp.pm
 	$(NOECHO) $(POD2MAN) --section=$(MAN3EXT) --perm_rw=$(PERM_RW) \
-	  Slurp.pm $(INST_MAN3DIR)/File::Slurp.$(MAN3EXT) \
 	  lib/File/Slurp.pm $(INST_MAN3DIR)/File::Slurp.$(MAN3EXT) 
 
 
@@ -476,7 +470,7 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) Generating META.yml
 	$(NOECHO) $(ECHO) '--- #YAML:1.0' > META_new.yml
 	$(NOECHO) $(ECHO) 'name:                File-Slurp' >> META_new.yml
-	$(NOECHO) $(ECHO) 'version:             9999.12' >> META_new.yml
+	$(NOECHO) $(ECHO) 'version:             9999.13' >> META_new.yml
 	$(NOECHO) $(ECHO) 'abstract:            Efficient Reading/Writing of Complete Files' >> META_new.yml
 	$(NOECHO) $(ECHO) 'license:             ~' >> META_new.yml
 	$(NOECHO) $(ECHO) 'author:              ' >> META_new.yml
@@ -754,7 +748,7 @@ testdb_static :: testdb_dynamic
 # --- MakeMaker ppd section:
 # Creates a PPD (Perl Package Description) for a binary distribution.
 ppd :
-	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="9999,12,0,0">' > $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="9999,13,0,0">' > $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <TITLE>$(DISTNAME)</TITLE>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <ABSTRACT>Efficient Reading/Writing of Complete Files</ABSTRACT>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <AUTHOR>Uri Guttman &lt;uri@stemsystems.com&gt;</AUTHOR>' >> $(DISTNAME).ppd
@@ -770,7 +764,6 @@ ppd :
 
 pm_to_blib : $(TO_INST_PM)
 	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e 'pm_to_blib({@ARGV}, '\''$(INST_LIB)/auto'\'', '\''$(PM_FILTER)'\'')' -- \
-	  Slurp.pm $(INST_LIB)/File/Slurp.pm \
 	  lib/File/Slurp.pm blib/lib/File/Slurp.pm 
 	$(NOECHO) $(TOUCH) pm_to_blib
 

@@ -1,4 +1,19 @@
-Revision history for Perl extension File::FastSlurp.
+Revision history File::Slurp
+
+9999.14
+	- Added special faster code to slurp in small text files which
+	  is a common case
+	- Rewrote the extras/slurp_bench.pl script. It has a full
+	  legend, better CLI options, size is selectable, benchmark
+	  entries have more consistant names and it compares the new
+	  fast slurp for small files to the general slurp code.
+		Thanks to Mark Friendlich
+	- Added t/error.t to actually test error conditions. Previous
+	  error.t was renamed to error_mode.t which better reflects its
+	  tests.
+	- t/error.t uses a new test driver module. this may get used by
+	  other tests in the future.
+	- Fixed check for SEEK_SET and other constant subs being defined
 
 9999.13   Tue Oct 10 02:04:51 EDT 2006
 	- Refactored the extras/slurp_bench.pl script. It has options,
@@ -6,7 +21,6 @@ Revision history for Perl extension File::FastSlurp.
 	- Reordered changes so recent entries are first
 	- Added error check on atomic rename and test for it
 		Thanks to Daniel Scott Sterling
-
 
 9999.12   Thu Feb  2 02:26:31 EST 2006
 	- Fixed bug on windows with classic slurping and File::Slurp not
@@ -51,7 +65,6 @@ Revision history for Perl extension File::FastSlurp.
 	  end if in append mode.n
 	  Thanks to Chris Dolan <cdolan@cpan.org>
 
-
 9999.08  Sat Apr 16 01:01:27 EDT 2005
 	- read_dir returns an array ref in scalar context
 	- read_dir keeps . and .. if keep_dot_dot option is set.
@@ -59,14 +72,11 @@ Revision history for Perl extension File::FastSlurp.
 	- slurp() is an optional exported alias to read_file
 	  Thanks to Damian Conway <damian@conway.org>
 
-
-
 9999.07  Tue Jan 25 01:33:11 EST 2005
 	- Slurping in pseudo files (as in /proc) which show a size of 0
 	  but actually have data works. This seems to be the case on
 	  linux but on Solaris those files show their proper size.
 	  Thanks to Juerd Waalboer <juerd@cpan.org>
-
 
 9999.06  Mon Sep 20 01:57:00 EDT 2004
 	- Slurping the DATA handle now works without the workaround.
@@ -76,17 +86,14 @@ Revision history for Perl extension File::FastSlurp.
 	  split on multiple newlines (/\n\n+/).
 	  Thanks to Geoffrey Leach <geoff@direcway.com>
 
-
 9999.05  Tue Feb 24 21:14:55 EST 2004
 	- skip handle tests where socketpair is not supported (pre 5.8
 	  on windows)
 	  Thanks to Mike Arms <marms@sandia.gov>
 
-
 9999.04  Mon Feb 23 14:20:52 EST 2004
 	- fixed DATA handle bug in t/handle.t (not seen on most OS's)
 	  Thanks to James Willmore <jwillmore@adelphia.net>
-
 
 9999.03  Mon Dec 22 01:44:43 EST 2003
 	- fixed DATA handle bugs in t/handle.t on osx (should be fixed

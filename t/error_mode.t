@@ -7,7 +7,7 @@ use Carp ;
 use Test::More tests => 9 ;
 
 my $file = 'missing/file' ;
-unlink $file ;
+#unlink $file ;
 
 
 my %modes = (

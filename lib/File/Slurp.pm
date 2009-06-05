@@ -18,7 +18,7 @@ use vars qw( %EXPORT_TAGS @EXPORT_OK $VERSION @EXPORT ) ;
 @EXPORT = ( @{ $EXPORT_TAGS{'all'} } );
 @EXPORT_OK = qw( slurp ) ;
 
-$VERSION = '9999.13';
+$VERSION = '9999.14';
 
 my $is_win32 = $^O =~ /win32/i ;
 
@@ -29,19 +29,19 @@ my $is_win32 = $^O =~ /win32/i ;
 # appealing BEGIN block:
 
 BEGIN {
-	unless( eval { defined SEEK_SET() } ) {
+	unless( defined &SEEK_SET ) {
 		*SEEK_SET = sub { 0 };
 		*SEEK_CUR = sub { 1 };
 		*SEEK_END = sub { 2 };
 	}
 
-	unless( eval { defined O_BINARY() } ) {
+	unless( defined &O_BINARY ) {
 		*O_BINARY = sub { 0 };
 		*O_RDONLY = sub { 0 };
 		*O_WRONLY = sub { 1 };
 	}
 
-	unless ( eval { defined O_APPEND() } ) {
+	unless ( defined O_APPEND ) {
 
 		if ( $^O =~ /olaris/ ) {
 			*O_APPEND = sub { 8 };
@@ -77,13 +77,10 @@ sub read_file {
 
 	my( $file_name, %args ) = @_ ;
 
-#	my $file_size = -s $file_name ;
-
-	if ( !ref $file_name && -s $file_name < 10000 && ! %args && !wantarray ) {
+	if ( !ref $file_name && 0 &&
+	     -e $file_name && -s _ < 10000 && ! %args && !wantarray ) {
 
 		local( *FH ) ;
-
-#		open( FH, $file_name ) ;
 
 		unless( open( FH, $file_name ) ) {
 
@@ -91,19 +88,14 @@ sub read_file {
 			goto &_error ;
 		}
 
-#print "OPT\n" and $printed++ unless $printed ;
-
-# 		sysread( FH, my $buf, -s _ ) ;
-# 		return $buf ;
-
-# 	}
 		my $read_cnt = sysread( FH, my $buf, -s _ ) ;
 
 		unless ( defined $read_cnt ) {
 
 # handle the read error
 
-			@_ = ( \%args, "read_file '$file_name' - sysread: $!");
+			@_ = ( \%args,
+				"read_file '$file_name' - small sysread: $!");
 			goto &_error ;
 		}
 
@@ -178,6 +170,8 @@ ERR
 
 		$size_left = -s $read_fh ;
 
+print "SIZE $size_left\n" ;
+
 ### TEST
 # blk_size is not needed if we have a real file size > 0. for 0 size who cares?
 # so test this deletion
@@ -190,22 +184,22 @@ ERR
 	}
 
 
-	if ( $size_left < 10000 && keys %args == 0 && !wantarray ) {
+# 	if ( $size_left < 10000 && keys %args == 0 && !wantarray ) {
 
-#print "OPT\n" and $printed++ unless $printed ;
+# #print "OPT\n" and $printed++ unless $printed ;
 
-		my $read_cnt = sysread( $read_fh, my $buf, $size_left ) ;
+# 		my $read_cnt = sysread( $read_fh, my $buf, $size_left ) ;
 
-		unless ( defined $read_cnt ) {
+# 		unless ( defined $read_cnt ) {
 
-# handle the read error
+# # handle the read error
 
-			@_ = ( \%args, "read_file '$file_name' - sysread: $!");
-			goto &_error ;
-		}
+# 			@_ = ( \%args, "read_file '$file_name' - small2 sysread: $!");
+# 			goto &_error ;
+# 		}
 
-		return $buf ;
-	}
+# 		return $buf ;
+# 	}
 
 # infinite read loop. we exit when we are done slurping
 
@@ -220,7 +214,7 @@ ERR
 
 # handle the read error
 
-			@_ = ( \%args, "read_file '$file_name' - sysread: $!");
+			@_ = ( \%args, "read_file '$file_name' - loop sysread: $!");
 			goto &_error ;
 		}
 
