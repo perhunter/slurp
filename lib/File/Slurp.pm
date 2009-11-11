@@ -154,7 +154,6 @@ ERR
 # a regular file. set the sysopen mode
 
 		my $mode = O_RDONLY ;
-		$mode |= O_BINARY if $args{'binmode'} ;
 
 #printf "RD: BINARY %x MODE %x\n", O_BINARY, $mode ;
 
@@ -164,6 +163,10 @@ ERR
 		unless ( sysopen( $read_fh, $file_name, $mode ) ) {
 			@_ = ( \%args, "read_file '$file_name' - sysopen: $!");
 			goto &_error ;
+		}
+
+		if ( my $binmode = $args{'binmode'} ) {
+			binmode( $read_fh, $binmode ) ;
 		}
 
 # get the size of the file for use in the read loop
@@ -336,7 +339,6 @@ sub write_file {
 # set the mode for the sysopen
 
 		my $mode = O_WRONLY | O_CREAT ;
-		$mode |= O_BINARY if $args->{'binmode'} ;
 		$mode |= O_APPEND if $args->{'append'} ;
 		$mode |= O_EXCL if $args->{'no_clobber'} ;
 
@@ -349,6 +351,10 @@ sub write_file {
 			@_ = ( $args, "write_file '$file_name' - sysopen: $!");
 			goto &_error ;
 		}
+	}
+
+	if ( my $binmode = $args{'binmode'} ) {
+		binmode( $write_fh, $binmode ) ;
 	}
 
 	sysseek( $write_fh, 0, SEEK_END ) if $args->{'append'} ;
