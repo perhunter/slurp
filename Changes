@@ -1,6 +1,6 @@
 Revision history File::Slurp
 
-9999.14
+9999.14	  Wed Apr 21 02:47:45 EDT 2010
 	- Added special faster code to slurp in small text files which
 	  is a common case
 	- Rewrote the extras/slurp_bench.pl script. It has a full
@@ -14,6 +14,7 @@ Revision history File::Slurp
 	- t/error.t uses a new test driver module. this may get used by
 	  other tests in the future.
 	- Fixed check for SEEK_SET and other constant subs being defined
+	- Added support for binmode other than :raw and binmode.t test
 
 9999.13   Tue Oct 10 02:04:51 EDT 2006
 	- Refactored the extras/slurp_bench.pl script. It has options,
