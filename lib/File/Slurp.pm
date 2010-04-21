@@ -20,6 +20,8 @@ use vars qw( %EXPORT_TAGS @EXPORT_OK $VERSION @EXPORT ) ;
 
 $VERSION = '9999.14';
 
+our $max_fast_slurp_size = 1024 * 100 ;
+
 my $is_win32 = $^O =~ /win32/i ;
 
 # Install subs for various constants that aren't set in older perls
@@ -78,7 +80,7 @@ sub read_file {
 	my( $file_name, %args ) = @_ ;
 
 	if ( !ref $file_name && 0 &&
-	     -e $file_name && -s _ < 10000 && ! %args && !wantarray ) {
+	     -e $file_name && -s _ < $max_fast_slurp_size && ! %args && !wantarray ) {
 
 		local( *FH ) ;
 
@@ -353,7 +355,7 @@ sub write_file {
 		}
 	}
 
-	if ( my $binmode = $args{'binmode'} ) {
+	if ( my $binmode = $args->{'binmode'} ) {
 		binmode( $write_fh, $binmode ) ;
 	}
 
@@ -585,14 +587,11 @@ The options are:
 
 =head3 binmode
 
-If you set the binmode option, then the file will be slurped in binary
-mode.
+If you set the binmode option, then the option will be passed to a
+binmode call on the opened filehandle.
 
 	my $bin_data = read_file( $bin_file, binmode => ':raw' ) ;
-
-NOTE: this actually sets the O_BINARY mode flag for sysopen. It
-probably should call binmode and pass its argument to support other
-file modes.
+	my $utf_text = read_file( $bin_file, binmode => ':utf8' ) ;
 
 =head3 array_ref
 
