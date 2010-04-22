@@ -43,7 +43,7 @@ BEGIN {
 		*O_WRONLY = sub { 1 };
 	}
 
-	unless ( defined O_APPEND ) {
+	unless ( defined &O_APPEND ) {
 
 		if ( $^O =~ /olaris/ ) {
 			*O_APPEND = sub { 8 };
@@ -344,12 +344,15 @@ sub write_file {
 		$mode |= O_APPEND if $args->{'append'} ;
 		$mode |= O_EXCL if $args->{'no_clobber'} ;
 
+		my $perms = $args->{perms} ;
+		$perms = 0666 unless defined $perms ;
+
 #printf "WR: BINARY %x MODE %x\n", O_BINARY, $mode ;
 
 # open the file and handle any error.
 
 		$write_fh = gensym ;
-		unless ( sysopen( $write_fh, $file_name, $mode ) ) {
+		unless ( sysopen( $write_fh, $file_name, $mode, $perms ) ) {
 			@_ = ( $args, "write_file '$file_name' - sysopen: $!");
 			goto &_error ;
 		}
@@ -512,7 +515,7 @@ sub _error {
 
 # call the carp/croak function
 
-	$func->($err_msg) ;
+	$func->($err_msg) if $func ;
 
 # return a hard undef (in list context this will be a single value of
 # undef which is not a legal in-band value)
@@ -604,18 +607,29 @@ slurped file. The following two calls are equivalent:
 
 =head3 scalar_ref
 
-If this boolean option is set, the return value (only in scalar
-context) will be an scalar reference to a string which is the contents
-of the slurped file. This will usually be faster than returning the
-plain scalar.
+If this boolean option is set, the return value (only in scalar context)
+will be an scalar reference to a string which is the contents of the
+slurped file. This will usually be faster than returning the plain
+scalar. It will also save memory as it will not make a copy of the file
+to return.
 
 	my $text_ref = read_file( $bin_file, scalar_ref => 1 ) ;
+
+=head3 perms
+
+The perms option sets the permissions of newly-created files. This value
+is modified by your process's umask and defaults to 0666 (same as
+sysopen).
+
+NOTE: this option is new as of File::Slurp version 9999.14;
+
 
 =head3 buf_ref
 
 You can use this option to pass in a scalar reference and the slurped
 file contents will be stored in the scalar. This can be used in
-conjunction with any of the other options.
+conjunction with any of the other options. This saves an extra copy of
+the slurped file and can lower ram usage vs returning the file.
 
 	my $text_ref = read_file( $bin_file, buf_ref => \$buffer,
 					     array_ref => 1 ) ;
@@ -719,14 +733,12 @@ be left behind.
 =head3 append
 
 If you set this boolean option, the data will be written at the end of
-the current file.
+the current file. Internally this sets the sysopen mode flag O_APPEND.
 
 	write_file( $file, {append => 1}, @data ) ;
 
 C<write_file> croaks if it cannot open the file. It returns true if it
-succeeded in writing out the file and undef if there was an
-error. (Yes, I know if it croaks it can't return anything but that is
-for when I add the options to select the error handling mode).
+succeeded in writing out the file and undef if there was an error.
 
 =head3 no_clobber
 
@@ -788,6 +800,10 @@ list of files.
 =head2 EXPORT
 
   read_file write_file overwrite_file append_file read_dir
+
+=head2 LICENSE
+
+  Same as Perl.
 
 =head2 SEE ALSO
 
