@@ -2,7 +2,11 @@ Revision history File::Slurp
 
 9999.16   Wed Apr 13 03:47:26 EDT 2011
 	- Added support for read_file options to be a hash reference.
+	- Added support for read_dir options to be a hash reference.
 	- Added new feature prepend_file
+	- Fixed bug with array_ref in list context. was introduced by .15/.14
+		Thanks to Norbert Gruener
+ 	- Cleaned up some pod
 
 9999.15   Thu Mar 24 16:40:19 EDT 2011
 	- Fixed error.t test so it works when run as root
