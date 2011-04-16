@@ -46,7 +46,7 @@ sub test_socketpair_slurp {
 
 		socketpair( $read_fh, $write_fh,
 				AF_UNIX, SOCK_STREAM, PF_UNSPEC);
-                
+
 		if ( fork() ) {
 
 #warn "PARENT SOCKET\n" ;
@@ -62,7 +62,7 @@ sub test_socketpair_slurp {
 #child
 #warn "CHILD SOCKET\n" ;
 			close( $read_fh ) ;
-			write_file( $write_fh, $data ) ;
+			eval { write_file( $write_fh, $data ) } ;
 			exit() ;
 		}
 	}

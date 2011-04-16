@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/local/bin/perl -w -T
 
 use strict ;
 use File::Slurp qw( write_file slurp ) ;

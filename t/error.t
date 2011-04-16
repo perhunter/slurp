@@ -2,124 +2,92 @@
 
 use lib qw(t) ;
 use strict ;
-use driver ;
+use Test::More ;
 
-use File::Slurp qw( :all ) ;
+BEGIN {
+	plan skip_all => "these tests need Perl 5.5" if $] < 5.005 ;
+}
+
+use TestDriver ;
+use File::Slurp qw( :all prepend_file ) ;
+
+my $is_win32 = $^O =~ /cygwin|win32/i ;
 
 my $file_name = 'test_file' ;
 my $dir_name = 'test_dir' ;
 
 my $tests = [
-
 	{
 		name	=> 'read_file open error',
 		sub	=> \&read_file,
 		args	=> [ $file_name ],
-
-		error => qr/open/,
-
-		skip	=> 1,
+		error	=> qr/open/,
 	},
-
 	{
 		name	=> 'write_file open error',
 		sub	=> \&write_file,
-		args	=> [ "$dir_name/$file_name", '' ],
-		pretest => sub {
-			mkdir $dir_name ;
-			chmod( 0555, $dir_name ) ;
-		},
-
-		posttest => sub {
-
-			chmod( 0777, $dir_name ) ;
-			rmdir $dir_name ;
-		},
-
-		error => qr/open/,
-		skip	=> 1,
+ 		args	=> [ $file_name, '' ],
+ 		override => 'sysopen',
+		error	=> qr/open/,
 	},
-
 	{
 		name	=> 'write_file syswrite error',
 		sub	=> \&write_file,
 		args	=> [ $file_name, '' ],
-		override	=> 'syswrite',
-
-		posttest => sub {
-			unlink( $file_name ) ;
-		},
-
-
-		error => qr/write/,
-		skip	=> 1,
+		override => 'syswrite',
+		posttest => sub { unlink( $file_name ) },
+		error	=> qr/write/,
 	},
-
 	{
 		name	=> 'read_file small sysread error',
 		sub	=> \&read_file,
 		args	=> [ $file_name ],
-		override	=> 'sysread',
-
-		pretest => sub {
-			write_file( $file_name, '' ) ;
-		},
-
-		posttest => sub {
-			unlink( $file_name ) ;
-		},
-
-
-		error => qr/read/,
+		override => 'sysread',
+		pretest => sub { write_file( $file_name, '' ) },
+		posttest => sub { unlink( $file_name ) },
+		error	=> qr/read/,
 	},
-
 	{
 		name	=> 'read_file loop sysread error',
 		sub	=> \&read_file,
 		args	=> [ $file_name ],
-		override	=> 'sysread',
-
-		pretest => sub {
-			write_file( $file_name, 'x' x 100_000 ) ;
-		},
-
-		posttest => sub {
-			unlink( $file_name ) ;
-		},
-
-
-		error => qr/read/,
+		override => 'sysread',
+		pretest => sub { write_file( $file_name, 'x' x 100_000 ) },
+		posttest => sub { unlink( $file_name ) },
+		error	=> qr/read/,
 	},
-
 	{
 		name	=> 'atomic rename error',
+# this test is meaningless on Win32
+		skip	=> $is_win32,
 		sub	=> \&write_file,
-		args	=> [ "$dir_name/$file_name", { atomic => 1 }, '' ],
-		pretest => sub {
-			mkdir $dir_name ;
-			write_file( "$dir_name/$file_name.$$", '' ) ;
-			chmod( 0555, $dir_name ) ;
-		},
-
-		posttest => sub {
-
-			chmod( 0777, $dir_name ) ;
-			unlink( "$dir_name/$file_name.$$" ) ;
-			rmdir $dir_name ;
-		},
-
-		error => qr/rename/,
-		skip	=> 1,
+		args	=> [ $file_name, { atomic => 1 }, '' ],
+		override => 'rename',
+		posttest => sub { "$file_name.$$" },
+		error	=> qr/rename/,
 	},
-
 	{
 		name	=> 'read_dir opendir error',
 		sub	=> \&read_dir,
 		args	=> [ $dir_name ],
-
-		error => qr/open/,
-		skip	=> 1,
+		error	=> qr/open/,
 	},
+	{
+		name	=> 'prepend_file read error',
+		sub	=> \&prepend_file,
+		args	=> [ $file_name ],
+		error	=> qr/read_file/,
+	},
+	{
+		name	=> 'prepend_file write error',
+		sub	=> \&prepend_file,
+		pretest	=> sub { write_file( $file_name, '' ) },
+		args	=> [ $file_name, '' ],
+		override => 'syswrite',
+		error	=> qr/write_file/,
+		posttest => sub { unlink $file_name, "$file_name.$$" },
+	},
+
 ] ;
 
 test_driver( $tests ) ;

@@ -6,8 +6,9 @@ use Test::More tests => 1;
 BEGIN { $^W = 1 }
 
 sub simple_write_file {
-    open my $fh, '>', $_[0] or die "Couldn't open $_[0] for write: $!";
-    print $fh $_[1];
+    open FH, ">$_[0]" or die "Couldn't open $_[0] for write: $!";
+    print FH $_[1];
+    close FH ;
 }
 
 sub newline_size {

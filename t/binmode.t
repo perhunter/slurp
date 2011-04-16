@@ -5,20 +5,24 @@ use Test::More ;
 use Carp ;
 use File::Slurp ;
 
-if ( $] < 5.008001 ) {
-        plan skip_all => 'Older Perl lacking unicode support' ;
-	exit ;
+BEGIN {
+	plan skip_all => 'Older Perl lacking unicode support'
+		if $] < 5.008001 ;
 }
 
 plan tests => 2 ;
 
-my $mode = ':utf8' ;
+my $suf = 'utf8' ;
+my $mode = ":$suf" ;
+
+my $is_win32 = $^O =~ /win32/i ;
 
 my $orig_text = "\x{20ac}\n" ;
+( my $win32_text = $orig_text ) =~ s/\n/\015\012/ ;
 my $unicode_length = length $orig_text ;
 
-my $control_file = "control.$mode" ;
-my $slurp_file = "slurp.$mode" ;
+my $control_file = "control.$suf" ;
+my $slurp_file = "slurp.$suf" ;
 
 open( my $fh, ">$mode", $control_file ) or
 	die "cannot create control unicode file '$control_file' $!" ;
@@ -26,7 +30,8 @@ print $fh $orig_text ;
 close $fh ;
 
 my $slurp_utf = read_file( $control_file, binmode => $mode ) ;
-ok( $slurp_utf eq $orig_text, "read_file of $mode file" ) ;
+my $written_text = $is_win32 ? $win32_text : $orig_text ;
+is( $slurp_utf, $written_text, "read_file of $mode file" ) ;
 
 # my $slurp_utf_length = length $slurp_utf ;
 # my $slurp_text = read_file( $control_file ) ;
@@ -40,6 +45,6 @@ open( $fh, "<$mode", $slurp_file ) or
 my $read_length = read( $fh, my $utf_text, $unicode_length ) ;
 close $fh ;
 
-ok( $utf_text eq $orig_text, "write_file of $mode file" ) ;
+is( $utf_text, $orig_text, "write_file of $mode file" ) ;
 
 unlink( $control_file, $slurp_file ) ;

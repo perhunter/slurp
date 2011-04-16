@@ -41,7 +41,7 @@ foreach my $size ( @bin_sizes ) {
 	push @bin_data, $data ;
 }
 
-plan( tests => 16 * @text_data + 8 * @bin_data ) ;
+plan( tests => 17 * @text_data + 8 * @bin_data ) ;
 
 #print "# text slurp\n" ;
 
@@ -52,9 +52,14 @@ foreach my $data ( @text_data ) {
 
 #print "# BIN slurp\n" ;
 
-foreach my $data ( @bin_data ) {
+SKIP: {
+	skip "binmode not available in this version of Perl", 8 * @bin_data
+		if $] < 5.006 ;
 
-	test_bin_slurp( $data ) ;
+	foreach my $data ( @bin_data ) {
+
+		test_bin_slurp( $data ) ;
+	}
 }
 
 unlink $file ;
@@ -114,9 +119,13 @@ sub test_text_slurp {
 		 "EXP:\n", map( "[$_]\n", @data_lines )
 			unless eq_array( \@array, \@data_lines ) ;
 
- 	my $array_ref = read_file( $file, array_ref => 1 ) ;
+	my $array_ref = read_file( $file, array_ref => 1 ) ;
 	ok( eq_array( $array_ref, \@data_lines ),
  			'array ref read_file - ' . length $data_text ) ;
+
+	($array_ref) = read_file( $file, {array_ref => 1} ) ;
+	ok( eq_array( $array_ref, \@data_lines ),
+	'array ref list context args ref read_file - ' . length $data_text ) ;
 
 	$err = write_file( $file, { append => 1 }, $data_text ) ;
 	ok( $err, 'write_file append - ' . length $data_text ) ;

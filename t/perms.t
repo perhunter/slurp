@@ -4,6 +4,7 @@ use strict ;
 use Test::More ;
 use File::Slurp ;
 
+plan skip_all => "meaningless on Win32" if $^O =~ /win32/i ;
 plan tests => 2 ;
 
 my $file = "perms.$$" ;

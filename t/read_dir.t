@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w -I.
 
 use strict ;
-use Test::More tests => 7 ;
+use Test::More tests => 8 ;
 
 use File::Slurp ;
 
@@ -18,6 +18,10 @@ ok( @dir_entries == 0, 'empty dir' ) ;
 @dir_entries = read_dir( $test_dir, keep_dot_dot => 1 ) ;
 
 ok( @dir_entries == 2, 'empty dir with . ..' ) ;
+
+@dir_entries = read_dir( $test_dir, { keep_dot_dot => 1 } ) ;
+
+ok( @dir_entries == 2, 'empty dir with . .. - args ref' ) ;
 
 write_file( "$test_dir/x", "foo\n" ) ;
 
