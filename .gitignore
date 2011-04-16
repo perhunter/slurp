@@ -1,0 +1,12 @@
+.gitignore
+old/
+scaf/
+experiment/
+slurp_talk/
+*~
+blib/
+*gz
+*.tar
+*.new
+Makefile
+*.old
