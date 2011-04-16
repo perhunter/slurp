@@ -1,11 +1,22 @@
+use strict ;
 use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile(
-    'NAME'		=> 'File::Slurp',
-    'VERSION_FROM'	=> 'lib/File/Slurp.pm', # finds $VERSION
-    'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
-    ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM => 'lib/File/Slurp.pm', # retrieve abstract from module
-       AUTHOR     => 'Uri Guttman <uri@stemsystems.com>') : ()),
+	'NAME'		=> 'File::Slurp',
+	'LICENSE'       => 'perl',
+	'AUTHOR'        => 'Uri Guttman <uri@stemsystems.com>',
+	'VERSION_FROM'	=> 'lib/File/Slurp.pm',
+	'ABSTRACT_FROM' => 'lib/File/Slurp.pm',
+	'META_MERGE'    => {
+		requires	=> {
+			perl	=> 5.004,
+		},
+	},
+	'PREREQ_PM'	=> {
+		'Carp'      => 0,
+		'Exporter'  => 0,
+		'Fcntl'     => 0,
+		'POSIX'     => 0,
+	},
 );

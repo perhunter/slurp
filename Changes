@@ -1,6 +1,16 @@
 Revision history File::Slurp
 
-9999.14	  Wed Apr 21 02:47:45 EDT 2010
+9999.16   Wed Apr 13 03:47:26 EDT 2011
+	- Added support for read_file options to be a hash reference.
+	- Added new feature prepend_file
+
+9999.15   Thu Mar 24 16:40:19 EDT 2011
+	- Fixed error.t test so it works when run as root
+	- Removed skip lines from error.t
+	- Fixed pod about binmode option to reflect changes in .14
+
+9999.14	  Sun Mar 20 16:26:47 EDT 2011
+	- Added LICENCE (same as perl) to POD
 	- Added special faster code to slurp in small text files which
 	  is a common case
 	- Rewrote the extras/slurp_bench.pl script. It has a full
@@ -8,6 +18,8 @@ Revision history File::Slurp
 	  entries have more consistant names and it compares the new
 	  fast slurp for small files to the general slurp code.
 		Thanks to Mark Friendlich
+	- Cleaned up pod
+	- Added more Synopsis examples
 	- Added t/error.t to actually test error conditions. Previous
 	  error.t was renamed to error_mode.t which better reflects its
 	  tests.
@@ -15,6 +27,19 @@ Revision history File::Slurp
 	  other tests in the future.
 	- Fixed check for SEEK_SET and other constant subs being defined
 	- Added support for binmode other than :raw and binmode.t test
+		Thanks to Martin J. Evans, Peter Edwards, Bryce Nesbitt
+	- Added support for perms option in write_file and perms.t test
+		Thanks to Peter Corlett and Paul Miller
+	- Added check to the rename call in atomic mode. Tested in error.t.
+		Thanks to Daniel Scott Sterling
+	- Added POD to state that using scalar_ref or buf_ref will be faster
+	  and save memory due to not making a copy
+		Thanks to Peter Edwards
+	- read_file in list mode keeps data tainted
+		Thanks to Sébastien Aperghis-Tramoni
+	- read_file checks for an overloaded object to get the file
+	  name. 
+		Thanks to Sébastien Aperghis-Tramoni
 
 9999.13   Tue Oct 10 02:04:51 EDT 2006
 	- Refactored the extras/slurp_bench.pl script. It has options,

@@ -1,39 +1,33 @@
 
-optimize read_file for smaller scalar slurps with no options
+File::Slurp TODO
 
-prepend_file()
+NEW FEATURES
 
-	options: lock file?
+prepend_file() -- prepend text to the front of a file
 
-edit_file()
+	options: lock file? enable atomic
 
-	options: lock file?
-
-edit_file_lines()
+edit_file() -- slurp into $_, call edit code block, write out $_
 
 	options: lock file?
 
-add options to read_dir
-	prepend_dir
-	grep filter qr or code ref
+edit_file_lines()  -- slurp each line into $_, call edit code block,
+	write out $_
 
+	options: lock file?
+
+read_file_lines()
+	reads lines to array ref or list
+	same as $list = read_file( $file, { array_ref => 1 } 
+	or @lines = read_file()
+
+new options for read_dir
+	prepend -- prepend the dir name to each dir entry.
+	filter -- grep dir entries with qr// or code ref.
 
 BUGS:
 
 restart sysread/write after a signal (or check i/o count)
 
-fix SEEK stuff
-
-sent in patches:
-
-check for objects/refs to filenames
-
-add chmod mode to write_file
-
-add perms (same as chmod?) to syswrite
-
-check result of rename in atomic mode
-
-
-
+FEATURE REQUESTS
 

@@ -1,4 +1,4 @@
-File::Slurp.pm version 0.04
+File::Slurp.pm
 ===========================
 
 This module provides subroutines to read or write entire files with a
@@ -7,17 +7,13 @@ in a directory.
 
 In the extras/ directory you can read an article (slurp_article.pod)
 about file slurping and also run a benchmark (slurp_bench.pl) that
-compares many ways of slurping/spewing files.
+compares many ways of slurping/spewing files. This benchmark was
+rewritten for .14 and is much better.
 
 This module was first written and owned by David Muir Sharnoff (MUIR on
 CPAN).  I checked out his module and decided to write a new version
-which would be faster, and with many more features.  To that end, David
+which would be faster and with many more features.  To that end, David
 graciously transfered the namespace to me.
-
-Since then, I discovered and fixed a bug in the original module's test
-script (which had only 7 tests), which is included now as t/original.t.
-This module now has 164 tests in 7 test scripts, and passes on Windows,
-Linux, Solaris and Mac OS X.
 
 There have been some comments about the somewhat unusual version number.
 The problem was that David used a future date (2004.0904) in his version
@@ -36,6 +32,6 @@ To install this module type the following:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2003 Uri Guttman <uri@stemsystems.com>
+Copyright (C) 2010 Uri Guttman <uri@PerlHunter.com>
 
 Licensed the same as Perl.
