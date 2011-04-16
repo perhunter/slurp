@@ -70,15 +70,15 @@ sub bench_scalar_slurp {
 		'FS12::read_file' =>
 	    		sub { my $text = FileSlurp_12::read_file( $file_name ) },
 
-# 		'FS::read_file_buf_ref' =>
-# 	    		sub { my $text ;
-# 			   File::Slurp::read_file( $file_name, buf_ref => \$text ) },
-# 		'FS::read_file_buf_ref2' =>
-# 	    		sub { 
-# 			   File::Slurp::read_file( $file_name, buf_ref => \$buffer ) },
-# 		'FS::read_file_scalar_ref' =>
-# 	    		sub { my $text =
-# 			    File::Slurp::read_file( $file_name, scalar_ref => 1 ) },
+		'FS::read_file_buf_ref' =>
+	    		sub { my $text ;
+			   File::Slurp::read_file( $file_name, buf_ref => \$text ) },
+		'FS::read_file_buf_ref2' =>
+	    		sub { 
+			   File::Slurp::read_file( $file_name, buf_ref => \$buffer ) },
+		'FS::read_file_scalar_ref' =>
+	    		sub { my $text =
+			    File::Slurp::read_file( $file_name, scalar_ref => 1 ) },
 
 		old_sysread_file =>
 	    		sub { my $text = old_sysread_file( $file_name ) },
@@ -384,7 +384,7 @@ sub parse_options {
 	$opts{direction} ||= 'both' ;
 	$opts{context} ||= 'both' ;
 	$opts{iterations} ||= -2 ;
-	$opts{sizes} ||= '500,10k,1m' ;
+	$opts{sizes} ||= '512,10k,1m' ;
 
 	if ( $opts{direction} eq 'both' ) {
 	
@@ -567,7 +567,7 @@ Usage: $0 [--iterations=<iter>] [--direction=<dir>] [--context=<con>]
 	--sizes=<size_list>	What sizes will be used in slurping (either
 	-s=<size_list>		direction). This is a comma separated list of
 				integers. You can use 'k' or 'm' as suffixes
-				for 1024 and 1024**2. Default is '500,1k,1m'.
+				for 1024 and 1024**2. Default is '512,10k,1m'.
 
 	--unlink		Unlink the written file before each time
 	-u			a file is written
