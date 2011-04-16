@@ -8,6 +8,12 @@ BEGIN {
 
 	*CORE::GLOBAL::sysread =
 	sub(*\$$;$) { my( $h, $b, $s ) = @_; CORE::sysread $h, $b, $s } ;
+
+	*CORE::GLOBAL::rename =
+	sub($$) { my( $old, $new ) = @_; CORE::rename $old, $new } ;
+
+	*CORE::GLOBAL::sysopen =
+	sub(*$$;$) { my( $h, $n, $m, $p ) = @_; CORE::sysopen $h, $n, $m, $p } ;
 }
 
 sub test_driver {
@@ -34,36 +40,36 @@ use Data::Dumper ;
 		my $override = $test->{override} ;
 
 # run any setup sub before this test. this can is used to modify the
-# object for this test (e.g. delete templates from the cache).
+# object for this test or create test files and data.
 
 		if( my $pretest = $test->{pretest} ) {
 
 			$pretest->($test) ;
 		}
 
-		my $sub = $test->{sub} ;
-		my $args = $test->{args} ;
+		if( my $sub = $test->{sub} ) {
 
-local( $^W) ;
-		local *{"CORE::GLOBAL::$override"} = sub {} if $override ;
+			my $args = $test->{args} ;
 
-		my $result = eval {
-			$sub->( @{$args} ) ;
-		} ;
+			local( $^W ) ;
+			local *{"CORE::GLOBAL::$override"} = sub {}
+				if $override ;
+
+			$test->{result} = eval { $sub->( @{$args} ) } ;
+
+			if ( $@ ) {
 
 # if we had an error and expected it, we pass this test
 
-		if ( $@ ) {
+				if ( $test->{error} &&
+				     $@ =~ /$test->{error}/ ) {
 
-			if ( $test->{error} && $@ =~ /$test->{error}/ ) {
-
-				ok( 1, $test->{name} ) ;
-#print "ERR [$@]\n" ;
-			}
-			else {
-
-				print "unexpected error: $@\n" ;
-				ok( 0, $test->{name} ) ;
+					$test->{ok} = 1 ;
+				}
+				else {
+					print "unexpected error: $@\n" ;
+					$test->{ok} = 0 ;
+				}
 			}
 		}
 
@@ -71,6 +77,11 @@ local( $^W) ;
 
 			$posttest->($test) ;
 		}
+
+		ok( $test->{ok}, $test->{name} ) if exists $test->{ok} ;
+		is( $test->{result}, $test->{expected}, $test->{name} ) if
+			exists $test->{expected} ;
+
 	}
 }
 
