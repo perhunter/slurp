@@ -20,7 +20,7 @@ use vars qw( @ISA %EXPORT_TAGS @EXPORT_OK $VERSION @EXPORT ) ;
 @EXPORT = ( @{ $EXPORT_TAGS{'all'} } );
 @EXPORT_OK = qw( slurp prepend_file ) ;
 
-$VERSION = '9999.15';
+$VERSION = '9999.16';
 
 my $max_fast_slurp_size = 1024 * 100 ;
 
