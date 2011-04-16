@@ -10,3 +10,4 @@ blib/
 *.new
 Makefile
 *.old
+File-Slurp.*
