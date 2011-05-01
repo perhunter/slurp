@@ -1,6 +1,6 @@
 package File::Slurp;
 
-my $printed ;
+use 5.6.2 ;
 
 use strict;
 
@@ -9,18 +9,16 @@ use Exporter ;
 use Fcntl qw( :DEFAULT ) ;
 use POSIX qw( :fcntl_h ) ;
 use Symbol ;
-use UNIVERSAL ;
 
-use vars qw( @ISA %EXPORT_TAGS @EXPORT_OK $VERSION @EXPORT ) ;
+use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION ) ;
 @ISA = qw( Exporter ) ;
 
+$VERSION = '9999.17';
+
+@EXPORT_OK = qw( slurp prepend_file ) ;
 %EXPORT_TAGS = ( 'all' => [
 	qw( read_file write_file overwrite_file append_file read_dir ) ] ) ;
-
 @EXPORT = ( @{ $EXPORT_TAGS{'all'} } );
-@EXPORT_OK = qw( slurp prepend_file ) ;
-
-$VERSION = '9999.16';
 
 my $max_fast_slurp_size = 1024 * 100 ;
 
@@ -82,28 +80,31 @@ sub read_file {
 	my $file_name = shift ;
 	my $opts = ( ref $_[0] eq 'HASH' ) ? shift : { @_ } ;
 
-	if ( !ref $file_name && 0 &&
-	     -e $file_name && -s _ < $max_fast_slurp_size && ! %{$opts} && !wantarray ) {
+# this is the optimized read_file for shorter files.
+# the test for -s > 0 is to allow pseudo files to be read with the
+# regular loop since they return a size of 0.
 
-		local( *FH ) ;
+	if ( !ref $file_name && -e $file_name && -s _ > 0 &&
+	     -s _ < $max_fast_slurp_size && !%{$opts} && !wantarray ) {
 
-		unless( open( FH, $file_name ) ) {
+
+		my $fh ;
+		unless( sysopen( $fh, $file_name, O_RDONLY ) ) {
 
 			@_ = ( $opts, "read_file '$file_name' - sysopen: $!");
 			goto &_error ;
 		}
 
-		my $read_cnt = sysread( FH, my $buf, -s _ ) ;
+		my $read_cnt = sysread( $fh, my $buf, -s _ ) ;
 
 		unless ( defined $read_cnt ) {
-
-# handle the read error
 
 			@_ = ( $opts,
 				"read_file '$file_name' - small sysread: $!");
 			goto &_error ;
 		}
 
+		$buf =~ s/\015\012/\n/g if $is_win32 ;
 		return $buf ;
 	}
 
@@ -158,8 +159,6 @@ sub read_file {
 
 #printf "RD: BINARY %x MODE %x\n", O_BINARY, $mode ;
 
-# open the file and handle any error
-
 		$read_fh = gensym ;
 		unless ( sysopen( $read_fh, $file_name, $mode ) ) {
 			@_ = ( $opts, "read_file '$file_name' - sysopen: $!");
@@ -176,7 +175,6 @@ sub read_file {
 
 #print "SIZE $size_left\n" ;
 
-
 # we need a blk_size if the size is 0 so we can handle pseudofiles like in
 # /proc. these show as 0 size but have data to be slurped.
 
@@ -190,13 +188,9 @@ sub read_file {
 
 # 	if ( $size_left < 10000 && keys %{$opts} == 0 && !wantarray ) {
 
-# #print "OPT\n" and $printed++ unless $printed ;
-
 # 		my $read_cnt = sysread( $read_fh, my $buf, $size_left ) ;
 
 # 		unless ( defined $read_cnt ) {
-
-# # handle the read error
 
 # 			@_ = ( $opts, "read_file '$file_name' - small2 sysread: $!");
 # 			goto &_error ;
@@ -215,8 +209,6 @@ sub read_file {
 				$size_left, length ${$buf_ref} ) ;
 
 		unless ( defined $read_cnt ) {
-
-# handle the read error
 
 			@_ = ( $opts, "read_file '$file_name' - loop sysread: $!");
 			goto &_error ;
@@ -240,9 +232,6 @@ sub read_file {
 
 	${$buf_ref} =~ s/\015\012/\n/g if $is_win32 && !$opts->{'binmode'} ;
 
-# this is the 5 returns in a row. each handles one possible
-# combination of caller context and requested return type
-
 	my $sep = $/ ;
 	$sep = '\n\n+' if defined $sep && $sep eq '' ;
 
@@ -250,19 +239,17 @@ sub read_file {
 
 	if( wantarray || $opts->{'array_ref'} ) {
 
-		my @parts = split m/($sep)/, ${$buf_ref}, -1;
+		use re 'taint' ;
 
-		my @lines ;
+		my @lines = length(${$buf_ref}) ?
+			${$buf_ref} =~ /(.*?$sep|.+)/sg : () ;
 
-		while( @parts > 2 ) {
-
-			my( $line, $sep ) = splice( @parts, 0, 2 ) ;
-			push @lines, "$line$sep" ;
-		}
-
-		push @lines, shift @parts if @parts && length $parts[0] ;
+# caller wants an array ref
 
 		return \@lines if $opts->{'array_ref'} ;
+
+# caller wants list of lines
+
 		return @lines ;
 	}
 
@@ -277,36 +264,7 @@ sub read_file {
 # caller passed in an i/o buffer by reference (normal void context)
 
 	return ;
-
-
-# # caller wants to get an array ref of lines
-
-# # this split doesn't work since it tries to use variable length lookbehind
-# # the m// line works.
-# #	return [ split( m|(?<=$sep)|, ${$buf_ref} ) ] if $opts->{'array_ref'}  ;
-# 	return [ length(${$buf_ref}) ? ${$buf_ref} =~ /(.*?$sep|.+)/sg : () ]
-# 		if $opts->{'array_ref'}  ;
-
-# # caller wants a list of lines (normal list context)
-
-# # same problem with this split as before.
-# #	return split( m|(?<=$sep)|, ${$buf_ref} ) if wantarray ;
-# 	return length(${$buf_ref}) ? ${$buf_ref} =~ /(.*?$sep|.+)/sg : ()
-# 		if wantarray ;
-
-# # caller wants a scalar ref to the slurped text
-
-# 	return $buf_ref if $opts->{'scalar_ref'} ;
-
-# # caller wants a scalar with the slurped text (normal scalar context)
-
-# 	return ${$buf_ref} if defined wantarray ;
-
-# # caller passed in an i/o buffer by reference (normal void context)
-
-# 	return ;
 }
-
 
 # errors in this sub are returned as scalar refs
 # a normal IO/GLOB handle is an empty return
@@ -496,7 +454,6 @@ sub write_file {
 
 	sysseek( $write_fh, 0, SEEK_END ) if $opts->{'append'} ;
 
-
 #print 'WR before data ', unpack( 'H*', ${$buf_ref}), "\n" ;
 
 # fix up newline to write cr/lf if this is a windows text file
@@ -527,12 +484,11 @@ sub write_file {
 
 		unless ( defined $write_cnt ) {
 
-# the write failed
 			@_ = ( $opts, "write_file '$file_name' - syswrite: $!");
 			goto &_error ;
 		}
 
-# track much left to write and where to write from in the buffer
+# track how much left to write and where to write from in the buffer
 
 		$size_left -= $write_cnt ;
 		$offset += $write_cnt ;
@@ -590,8 +546,6 @@ sub append_file {
 	goto &write_file
 }
 
-# basic wrapper around opendir/readdir
-
 # prepend data to the beginning of a file
 
 sub prepend_file {
@@ -615,16 +569,11 @@ sub prepend_file {
 
 #print "PRE [$prepend_data]\n" ;
 
-
-###### set croak as error_mode
-###### wrap in eval
-
 	my $err_mode = delete $opts->{err_mode} ;
 	$opts->{ err_mode } = 'croak' ;
 	$opts->{ scalar_ref } = 1 ;
 
-	my $existing_data ;
-	eval { $existing_data = read_file( $file_name, $opts ) } ;
+	my $existing_data = eval { read_file( $file_name, $opts ) } ;
 
 	if ( $@ ) {
 
@@ -635,11 +584,10 @@ sub prepend_file {
 
 #print "EXIST [$$existing_data]\n" ;
 
-	$opts->{ atomic } = 1 ;
-
-	my $write_result = eval { 
-		write_file( $file_name, $opts,
-			$prepend_data, $$existing_data ) ;
+	$opts->{atomic} = 1 ;
+	my $write_result =
+		eval { write_file( $file_name, $opts,
+		       $prepend_data, $$existing_data ) ;
 	} ;
 
 	if ( $@ ) {
@@ -651,6 +599,116 @@ sub prepend_file {
 
 	return $write_result ;
 }
+
+# edit a file as a scalar in $_
+
+sub edit_file(&$;$) {
+
+	my( $edit_code, $file_name, $opts ) = @_ ;
+	$opts = {} unless ref $opts eq 'HASH' ;
+
+# 	my $edit_code = shift ;
+# 	my $file_name = shift ;
+# 	my $opts = ( ref $_[0] eq 'HASH' ) ? shift : {} ;
+
+#print "FILE $file_name\n" ;
+
+# delete unsupported options
+
+	my @bad_opts =
+		grep $_ ne 'err_mode' && $_ ne 'binmode', keys %{$opts} ;
+
+	delete @{$opts}{@bad_opts} ;
+
+# keep the user err_mode and force croaking on internal errors
+
+	my $err_mode = delete $opts->{err_mode} ;
+	$opts->{ err_mode } = 'croak' ;
+
+# get a scalar ref for speed and slurp the file into a scalar
+
+	$opts->{ scalar_ref } = 1 ;
+	my $existing_data = eval { read_file( $file_name, $opts ) } ;
+
+	if ( $@ ) {
+
+		@_ = ( { err_mode => $err_mode },
+			"edit_file '$file_name' - read_file: $!" ) ;
+		goto &_error ;
+	}
+
+#print "EXIST [$$existing_data]\n" ;
+
+	my( $edited_data ) = map { $edit_code->(); $_ } $$existing_data ;
+
+	$opts->{atomic} = 1 ;
+	my $write_result =
+		eval { write_file( $file_name, $opts, $edited_data ) } ;
+
+	if ( $@ ) {
+
+		@_ = ( { err_mode => $err_mode },
+			"edit_file '$file_name' - write_file: $!" ) ;
+		goto &_error ;
+	}
+
+	return $write_result ;
+}
+
+sub edit_file_lines(&$;$) {
+
+	my( $edit_code, $file_name, $opts ) = @_ ;
+	$opts = {} unless ref $opts eq 'HASH' ;
+
+# 	my $edit_code = shift ;
+# 	my $file_name = shift ;
+# 	my $opts = ( ref $_[0] eq 'HASH' ) ? shift : {} ;
+
+#print "FILE $file_name\n" ;
+
+# delete unsupported options
+
+	my @bad_opts =
+		grep $_ ne 'err_mode' && $_ ne 'binmode', keys %{$opts} ;
+
+	delete @{$opts}{@bad_opts} ;
+
+# keep the user err_mode and force croaking on internal errors
+
+	my $err_mode = delete $opts->{err_mode} ;
+	$opts->{ err_mode } = 'croak' ;
+
+# get an array ref for speed and slurp the file into lines
+
+	$opts->{ array_ref } = 1 ;
+	my $existing_data = eval { read_file( $file_name, $opts ) } ;
+
+	if ( $@ ) {
+
+		@_ = ( { err_mode => $err_mode },
+			"edit_file_lines '$file_name' - read_file: $!" ) ;
+		goto &_error ;
+	}
+
+#print "EXIST [$$existing_data]\n" ;
+
+	my @edited_data = map { $edit_code->(); $_ } @$existing_data ;
+
+	$opts->{atomic} = 1 ;
+	my $write_result =
+		eval { write_file( $file_name, $opts, @edited_data ) } ;
+
+	if ( $@ ) {
+
+		@_ = ( { err_mode => $err_mode },
+			"edit_file_lines '$file_name' - write_file: $!" ) ;
+		goto &_error ;
+	}
+
+	return $write_result ;
+}
+
+# basic wrapper around opendir/readdir
 
 sub read_dir {
 
@@ -720,7 +778,7 @@ __END__
 
 =head1 NAME
 
-File::Slurp - Simple and Efficient Reading/Writing of Complete Files
+File::Slurp - Simple and Efficient Reading/Writing/Modifying of Complete Files
 
 =head1 SYNOPSIS
 
@@ -747,6 +805,10 @@ File::Slurp - Simple and Efficient Reading/Writing of Complete Files
 
   my %conf = read_file( $file_name ) =~ /^(\w+)=(\.*)$/mg ;
   write_file( $file_name, {atomic => 1}, map "$_=$conf{$_}\n", keys %conf ;
+
+# insert text at the beginning of a file
+
+  prepend_file( 'filename', $text ) ;
 
 # read in a whole directory of file names (skipping . and ..)
 
@@ -803,6 +865,12 @@ impossible to get with a clean read_file call which means you can check
 the return value and always know if you had an error. You can change how
 errors are handled with the C<err_mode> option.
 
+Speed Note: If you call read_file and just get a scalar return value
+it is now optimized to handle shorter files. This is only used if no
+options are used, the file is shorter then 100k bytes, the filename is
+a plain scalar and a scalar file is returned. If you want the fastest
+slurping, use the C<buf_ref> or C<scalar_ref> options (see below)
+
 NOTE: as of version 9999.06, read_file works correctly on the C<DATA>
 handle. It used to need a sysseek workaround but that is now handled
 when needed by the module itself.
@@ -833,11 +901,12 @@ slurped file. The following two calls are equivalent:
 
 =head3 scalar_ref
 
-If this boolean option is set, the return value (only in scalar context)
-will be an scalar reference to a string which is the contents of the
-slurped file. This will usually be faster than returning the plain
-scalar. It will also save memory as it will not make a copy of the file
-to return.
+If this boolean option is set, the return value (only in scalar
+context) will be an scalar reference to a string which is the contents
+of the slurped file. This will usually be faster than returning the
+plain scalar. It will also save memory as it will not make a copy of
+the file to return. Run the extras/slurp_bench.pl script to see speed
+comparisons.
 
 	my $text_ref = read_file( $bin_file, scalar_ref => 1 ) ;
 
@@ -846,7 +915,10 @@ to return.
 You can use this option to pass in a scalar reference and the slurped
 file contents will be stored in the scalar. This can be used in
 conjunction with any of the other options. This saves an extra copy of
-the slurped file and can lower ram usage vs returning the file.
+the slurped file and can lower ram usage vs returning the file. It is
+usually the fastest way to read a file into a scalar. Run the
+extras/slurp_bench.pl script to see speed comparisons.
+
 
 	read_file( $bin_file, buf_ref => \$buffer ) ;
 
