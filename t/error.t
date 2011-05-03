@@ -9,7 +9,7 @@ BEGIN {
 }
 
 use TestDriver ;
-use File::Slurp qw( :all prepend_file ) ;
+use File::Slurp qw( :all prepend_file edit_file ) ;
 
 my $is_win32 = $^O =~ /cygwin|win32/i ;
 
@@ -87,7 +87,36 @@ my $tests = [
 		error	=> qr/write_file/,
 		posttest => sub { unlink $file_name, "$file_name.$$" },
 	},
-
+	{
+		name	=> 'edit_file read error',
+		sub	=> \&edit_file,
+		args	=> [ sub{}, $file_name ],
+		error	=> qr/read_file/,
+	},
+	{
+		name	=> 'edit_file write error',
+		sub	=> \&edit_file,
+		pretest	=> sub { write_file( $file_name, '' ) },
+		args	=> [ sub{}, $file_name ],
+		override => 'syswrite',
+		error	=> qr/write_file/,
+		posttest => sub { unlink $file_name, "$file_name.$$" },
+	},
+	{
+		name	=> 'edit_file_lines read error',
+		sub	=> \&edit_file_lines,
+		args	=> [ sub{}, $file_name ],
+		error	=> qr/read_file/,
+	},
+	{
+		name	=> 'edit_file_lines write error',
+		sub	=> \&edit_file_lines,
+		pretest	=> sub { write_file( $file_name, '' ) },
+		args	=> [ sub{}, $file_name ],
+		override => 'syswrite',
+		error	=> qr/write_file/,
+		posttest => sub { unlink $file_name, "$file_name.$$" },
+	},
 ] ;
 
 test_driver( $tests ) ;
