@@ -15,9 +15,21 @@ use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION ) ;
 
 $VERSION = '9999.17';
 
-@EXPORT_OK = qw( slurp prepend_file ) ;
-%EXPORT_TAGS = ( 'all' => [
-	qw( read_file write_file overwrite_file append_file read_dir ) ] ) ;
+@EXPORT_OK = qw(
+	slurp
+	prepend_file
+	edit_file
+	edit_file_lines
+) ;
+
+%EXPORT_TAGS = ( 'all' => [ qw(
+	read_file
+	write_file
+	overwrite_file
+	append_file
+	read_dir ),
+	@EXPORT_OK	
+] ) ;
 @EXPORT = ( @{ $EXPORT_TAGS{'all'} } );
 
 my $max_fast_slurp_size = 1024 * 100 ;
