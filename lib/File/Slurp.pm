@@ -3,12 +3,13 @@ package File::Slurp;
 use 5.6.2 ;
 
 use strict;
+use warnings ;
 
 use Carp ;
 use Exporter ;
 use Fcntl qw( :DEFAULT ) ;
 use POSIX qw( :fcntl_h ) ;
-use Symbol ;
+#use Symbol ;
 
 use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION ) ;
 @ISA = qw( Exporter ) ;
@@ -171,7 +172,8 @@ sub read_file {
 
 #printf "RD: BINARY %x MODE %x\n", O_BINARY, $mode ;
 
-		$read_fh = gensym ;
+		$read_fh = local( *FH ) ;
+#		$read_fh = gensym ;
 		unless ( sysopen( $read_fh, $file_name, $mode ) ) {
 			@_ = ( $opts, "read_file '$file_name' - sysopen: $!");
 			goto &_error ;
@@ -196,20 +198,6 @@ sub read_file {
 			$size_left = $blk_size ;
 		}
 	}
-
-
-# 	if ( $size_left < 10000 && keys %{$opts} == 0 && !wantarray ) {
-
-# 		my $read_cnt = sysread( $read_fh, my $buf, $size_left ) ;
-
-# 		unless ( defined $read_cnt ) {
-
-# 			@_ = ( $opts, "read_file '$file_name' - small2 sysread: $!");
-# 			goto &_error ;
-# 		}
-
-# 		return $buf ;
-# 	}
 
 # infinite read loop. we exit when we are done slurping
 
@@ -255,6 +243,8 @@ sub read_file {
 
 		my @lines = length(${$buf_ref}) ?
 			${$buf_ref} =~ /(.*?$sep|.+)/sg : () ;
+
+		chomp @lines if $opts->{'chomp'} ;
 
 # caller wants an array ref
 
@@ -452,7 +442,8 @@ sub write_file {
 
 # open the file and handle any error.
 
-		$write_fh = gensym ;
+		$write_fh = local( *FH ) ;
+#		$write_fh = gensym ;
 		unless ( sysopen( $write_fh, $file_name, $mode, $perms ) ) {
 
 			@_ = ( $opts, "write_file '$file_name' - sysopen: $!");
@@ -744,6 +735,11 @@ sub read_dir {
 	@dir_entries = grep( $_ ne "." && $_ ne "..", @dir_entries )
 		unless $opts->{'keep_dot_dot'} ;
 
+	if ( $opts->{'prefix'} ) {
+
+		substr( $_, 0, 0, "$dir/" ) for @dir_entries ;
+	}
+
 	return @dir_entries if wantarray ;
 	return \@dir_entries ;
 }
@@ -797,33 +793,32 @@ File::Slurp - Simple and Efficient Reading/Writing/Modifying of Complete Files
   use File::Slurp;
 
 # read in a whole file into a scalar
-
   my $text = read_file( 'filename' ) ;
 
 # read in a whole file into an array of lines
-
   my @lines = read_file( 'filename' ) ;
 
 # write out a whole file from a scalar
-
   write_file( 'filename', $text ) ;
 
 # write out a whole file from an array of lines
-
   write_file( 'filename', @lines ) ;
 
 # Here is a simple and fast way to load and save a simple config file
 # made of key=value lines.
-
   my %conf = read_file( $file_name ) =~ /^(\w+)=(\.*)$/mg ;
   write_file( $file_name, {atomic => 1}, map "$_=$conf{$_}\n", keys %conf ;
 
 # insert text at the beginning of a file
-
   prepend_file( 'filename', $text ) ;
 
-# read in a whole directory of file names (skipping . and ..)
+# in-place edit to replace all 'foo' with 'bar' in file 
+  edit_file { s/foo/bar/g } 'filename' ;
 
+# in-place edit to delete all lines with 'foo' from file
+  edit_file_lines sub { $_ = '' if /foo/ }, 'filename' ;
+
+# read in a whole directory of file names (skipping . and ..)
   my @files = read_dir( '/path/to/dir' ) ;
 
 =head1 DESCRIPTION
@@ -910,6 +905,12 @@ slurped file. The following two calls are equivalent:
 
 	my $lines_ref = read_file( $bin_file, array_ref => 1 ) ;
 	my $lines_ref = [ read_file( $bin_file ) ] ;
+
+=head3 chomp
+
+If this boolean option is set, the lines are chomped. This only
+happens if you are slurping in a list context or using the
+C<array_ref> option.
 
 =head3 scalar_ref
 
@@ -1115,6 +1116,47 @@ explicitly.
 	prepend_file( $file, \@lines ) ;
 	prepend_file( $file, { binmode => 'raw:'}, $bin_data ) ;
 
+
+=head2 edit_file, edit_file_lines
+
+These subs read in a file into $_, execute a code block which should
+modify $_ and then write $_ back to the file. The difference between
+them is that C<edit_file> reads the whole file into $_ and calls the
+code block one time. With C<edit_file_lines> each line is read into $_
+and the code is called for each line. In both cases the code should
+modify $_ if desired and it will be written back out. These subs are
+the equivilent of the -pi command line options of Perl but you can
+call them from inside your program and not fork out a process.
+
+The first argument to C<edit_file> and C<edit_file_lines> is a code
+block or a code reference. The code block is not followed by a comma
+(as with grep and map) but a code reference is followed by a
+comma. See the examples below for both styles. The next argument is
+the filename. The last argument is an optional hash reference and it
+contains key/values that can modify the behavior of
+C<prepend_file>. 
+
+Only the C<binmode> and C<err_mode> options are supported. The
+C<write_file> call has the C<atomic> option set so you will always
+have a consistant file. See above for more about those options.
+
+Each group of calls below show a Perl command line instance and the
+equivilent calls to C<edit_file> and C<edit_file_lines>.
+
+	perl -0777 -pi -e 's/foo/bar/g' filename
+	use File::Slurp ;
+	edit_file { s/foo/bar/g } 'filename' ;
+	edit_file sub { s/foo/bar/g }, 'filename' ;
+	edit_file \&replace_foo, 'filename' ;
+	sub replace_foo { s/foo/bar/g }
+
+	perl -pi -e '$_ = '' if /foo/' filename
+	use File::Slurp ;
+	edit_file_lines { $_ = '' if /foo/ } 'filename' ;
+	edit_file_lines sub { $_ = '' if /foo/ }, 'filename' ;
+	edit_file \&delete_foo, 'filename' ;
+	sub delete_foo { $_ = '' if /foo/ }
+
 =head2 read_dir
 
 This sub reads all the file names from directory and returns them to
@@ -1142,6 +1184,15 @@ If this boolean option is set, C<.> and C<..> are not removed from the
 list of files.
 
 	my @all_files = read_dir( '/path/to/dir', keep_dot_dot => 1 ) ;
+
+=head3 prefix
+
+If this boolean option is set, the string "$dir/" is prefixed to each
+dir entry. This means you can directly use the results to open
+files. A common newbie mistake is not putting the directory in front
+of entries when opening themn.
+
+	my @paths = read_dir( '/path/to/dir', prefix => 1 ) ;
 
 =head2 EXPORT
 
