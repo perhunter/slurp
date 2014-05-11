@@ -56,11 +56,11 @@ DIRFILESEP = /
 DFSEP = $(DIRFILESEP)
 NAME = File::Slurp
 NAME_SYM = File_Slurp
-VERSION = 9999.16
+VERSION = 9999.19
 VERSION_MACRO = VERSION
-VERSION_SYM = 9999_16
+VERSION_SYM = 9999_19
 DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
-XS_VERSION = 9999.16
+XS_VERSION = 9999.19
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
 INST_ARCHLIB = blib/arch
@@ -181,13 +181,10 @@ PERL_ARCHIVE       =
 PERL_ARCHIVE_AFTER = 
 
 
-TO_INST_PM = lib/File/Slurp.pm \
-	lib/File/Slurp.pm.new
+TO_INST_PM = lib/File/Slurp.pm
 
 PM_TO_BLIB = lib/File/Slurp.pm \
-	blib/lib/File/Slurp.pm \
-	lib/File/Slurp.pm.new \
-	blib/lib/File/Slurp.pm.new
+	blib/lib/File/Slurp.pm
 
 
 # --- MakeMaker platform_constants section:
@@ -254,7 +251,7 @@ RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
 DIST_CP = best
 DIST_DEFAULT = tardist
 DISTNAME = File-Slurp
-DISTVNAME = File-Slurp-9999.16
+DISTVNAME = File-Slurp-9999.19
 
 
 # --- MakeMaker macro section:
@@ -422,17 +419,11 @@ manifypods : pure_all  \
 
 # --- MakeMaker subdirs section:
 
-# The default clean, realclean and test targets in this Makefile
-# have automatically been given entries for each subdir.
-
-
-subdirs ::
-	$(NOECHO) cd File-Slurp-9999.15 && $(MAKE) $(USEMAKEFILE) $(FIRST_MAKEFILE) all $(PASTHRU)
-
+# none
 
 # --- MakeMaker clean_subdirs section:
 clean_subdirs :
-	$(ABSPERLRUN)  -e 'chdir '\''File-Slurp-9999.15'\'';  system '\''$(MAKE) clean'\'' if -f '\''$(FIRST_MAKEFILE)'\'';' --
+	$(NOECHO) $(NOOP)
 
 
 # --- MakeMaker clean section:
@@ -452,10 +443,10 @@ clean :: clean_subdirs
 	  $(INST_ARCHAUTODIR)/extralibs.ld blibdirs.ts \
 	  core.[0-9][0-9][0-9][0-9][0-9] *perl.core \
 	  core.*perl.*.? $(MAKE_APERL_FILE) \
-	  $(BASEEXT).def perl \
+	  perl $(BASEEXT).def \
 	  core.[0-9][0-9][0-9] mon.out \
-	  lib$(BASEEXT).def perl.exe \
-	  perlmain.c so_locations \
+	  lib$(BASEEXT).def perlmain.c \
+	  perl.exe so_locations \
 	  $(BASEEXT).exp 
 	- $(RM_RF) \
 	  blib 
@@ -464,8 +455,7 @@ clean :: clean_subdirs
 
 # --- MakeMaker realclean_subdirs section:
 realclean_subdirs :
-	- $(ABSPERLRUN)  -e 'chdir '\''File-Slurp-9999.15'\'';  system '\''$(MAKE) $(USEMAKEFILE) $(MAKEFILE_OLD) realclean'\'' if -f '\''$(MAKEFILE_OLD)'\'';' --
-	- $(ABSPERLRUN)  -e 'chdir '\''File-Slurp-9999.15'\'';  system '\''$(MAKE) $(USEMAKEFILE) $(FIRST_MAKEFILE) realclean'\'' if -f '\''$(FIRST_MAKEFILE)'\'';' --
+	$(NOECHO) $(NOOP)
 
 
 # --- MakeMaker realclean section:
@@ -482,8 +472,8 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) Generating META.yml
 	$(NOECHO) $(ECHO) '--- #YAML:1.0' > META_new.yml
 	$(NOECHO) $(ECHO) 'name:                File-Slurp' >> META_new.yml
-	$(NOECHO) $(ECHO) 'version:             9999.16' >> META_new.yml
-	$(NOECHO) $(ECHO) 'abstract:            Simple and Efficient Reading/Writing of Complete Files' >> META_new.yml
+	$(NOECHO) $(ECHO) 'version:             9999.19' >> META_new.yml
+	$(NOECHO) $(ECHO) 'abstract:            Simple and Efficient Reading/Writing/Modifying of Complete Files' >> META_new.yml
 	$(NOECHO) $(ECHO) 'license:             perl' >> META_new.yml
 	$(NOECHO) $(ECHO) 'author:              ' >> META_new.yml
 	$(NOECHO) $(ECHO) '    - Uri Guttman <uri@stemsystems.com>' >> META_new.yml
@@ -728,7 +718,7 @@ $(MAP_TARGET) :: static $(MAKE_APERL_FILE)
 $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE) pm_to_blib
 	$(NOECHO) $(ECHO) Writing \"$(MAKE_APERL_FILE)\" for this $(MAP_TARGET)
 	$(NOECHO) $(PERLRUNINST) \
-		Makefile.PL DIR=File-Slurp-9999.15 \
+		Makefile.PL DIR= \
 		MAKEFILE=$(MAKE_APERL_FILE) LINKTYPE=static \
 		MAKEAPERL=1 NORECURS=1 CCCDLFLAGS=
 
@@ -748,9 +738,6 @@ test :: $(TEST_TYPE) subdirs-test
 subdirs-test ::
 	$(NOECHO) $(NOOP)
 
-subdirs-test ::
-	$(NOECHO) cd File-Slurp-9999.15 && $(MAKE) test $(PASTHRU)
-
 
 test_dynamic :: pure_all
 	PERL_DL_NONLAZY=1 $(FULLPERLRUN) "-MExtUtils::Command::MM" "-e" "test_harness($(TEST_VERBOSE), '$(INST_LIB)', '$(INST_ARCHLIB)')" $(TEST_FILES)
@@ -767,9 +754,9 @@ testdb_static :: testdb_dynamic
 # --- MakeMaker ppd section:
 # Creates a PPD (Perl Package Description) for a binary distribution.
 ppd :
-	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="9999,16,0,0">' > $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="9999,19,0,0">' > $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <TITLE>$(DISTNAME)</TITLE>' >> $(DISTNAME).ppd
-	$(NOECHO) $(ECHO) '    <ABSTRACT>Simple and Efficient Reading/Writing of Complete Files</ABSTRACT>' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '    <ABSTRACT>Simple and Efficient Reading/Writing/Modifying of Complete Files</ABSTRACT>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <AUTHOR>Uri Guttman &lt;uri@stemsystems.com&gt;</AUTHOR>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <IMPLEMENTATION>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <DEPENDENCY NAME="Carp" VERSION="0,0,0,0" />' >> $(DISTNAME).ppd
@@ -787,8 +774,7 @@ ppd :
 
 pm_to_blib : $(TO_INST_PM)
 	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e 'pm_to_blib({@ARGV}, '\''$(INST_LIB)/auto'\'', '\''$(PM_FILTER)'\'')' -- \
-	  lib/File/Slurp.pm blib/lib/File/Slurp.pm \
-	  lib/File/Slurp.pm.new blib/lib/File/Slurp.pm.new 
+	  lib/File/Slurp.pm blib/lib/File/Slurp.pm 
 	$(NOECHO) $(TOUCH) pm_to_blib
 
 

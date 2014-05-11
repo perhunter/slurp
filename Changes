@@ -1,5 +1,28 @@
 Revision history File::Slurp
 
+9999.19	  Tue Jun  7 04:06:06 EDT 2011
+	- Fixed use line in t/edit_file.t to import :edit first
+	  Thanks to paul
+	- read_file and write_file work even when interrupted by signals
+	  this includes a test for read_file interrupt
+	  Thanks to Andrew Danforth 
+	- Fixed bugs in the config synopsis example
+
+9999.18	  Fri May 13 02:30:05 EDT 2011
+	- Added :std and :edit export tags
+	- Cleaned up EXPORT vars
+	- Documented importing edit_file and edit_file_lines
+	- Fixed some pod spelling
+
+9999.17	  Wed Apr 27 02:20:03 EDT 2011
+	- Requiring Perl 5.6.2 (first time older Perls were dropped)
+		This is because of use of the re 'taint' pragma
+	- Added major new features: edit_file and edit_file_lines
+	- Speed up of tainted slurp with return of lines
+	- Added chomp option to read_file
+	- Added prefix option to read_dir
+	- Fixed optimization of reading small files.
+
 9999.16   Wed Apr 13 03:47:26 EDT 2011
 	- Added support for read_file options to be a hash reference.
 	- Added support for read_dir options to be a hash reference.

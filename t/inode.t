@@ -9,16 +9,13 @@ use Socket ;
 use Symbol ;
 use Test::More ;
 
-
-BEGIN{ 
-
+BEGIN { 
 	if( $^O =~ '32' ) {
 		plan skip_all => 'skip inode test on windows';
 		exit ;
 	}
-	else {
-		plan tests => 2 ;
-	}
+
+	plan tests => 2 ;
 }
 
 my $data = <<TEXT ;

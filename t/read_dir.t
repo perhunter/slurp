@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w -I.
 
 use strict ;
-use Test::More tests => 8 ;
+use Test::More tests => 9 ;
 
 use File::Slurp ;
 
@@ -51,6 +51,11 @@ my $dir_entries_ref = read_dir( $test_dir ) ;
 
 ok( eq_array( $dir_entries_ref, \@expected_entries ),
 	"dir in array ref" ) ;
+
+my @prefixed_entries = read_dir( $test_dir, {prefix => 1} ) ;
+@prefixed_entries = sort @prefixed_entries ;
+ok( eq_array( \@prefixed_entries, [map "$test_dir/$_", @dir_entries] ),
+	'prefix option' ) ;
 
 # clean up
 

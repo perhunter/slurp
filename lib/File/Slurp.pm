@@ -1,6 +1,6 @@
 package File::Slurp;
 
-use 5.6.2 ;
+use 5.006002 ;
 
 use strict;
 use warnings ;
@@ -9,29 +9,54 @@ use Carp ;
 use Exporter ;
 use Fcntl qw( :DEFAULT ) ;
 use POSIX qw( :fcntl_h ) ;
+use Errno ;
 #use Symbol ;
 
 use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION ) ;
 @ISA = qw( Exporter ) ;
 
-$VERSION = '9999.17';
+$VERSION = '9999.20';
 
-@EXPORT_OK = qw(
-	slurp
-	prepend_file
-	edit_file
-	edit_file_lines
-) ;
-
-%EXPORT_TAGS = ( 'all' => [ qw(
+my @std_export = qw(
 	read_file
 	write_file
 	overwrite_file
 	append_file
-	read_dir ),
-	@EXPORT_OK	
-] ) ;
-@EXPORT = ( @{ $EXPORT_TAGS{'all'} } );
+	read_dir
+) ;
+
+my @edit_export = qw( 
+	edit_file
+	edit_file_lines
+) ;
+
+my @ok_export = qw( 
+) ;
+
+my @abbrev_export = qw(
+	rf
+	wf
+	ef
+	efl
+) ;
+
+@EXPORT_OK = (
+	@edit_export,
+	@abbrev_export,
+	qw(
+		slurp
+		prepend_file
+	),
+) ;
+
+%EXPORT_TAGS = (
+	'all'	=> [ @std_export, @edit_export, @abbrev_export, @EXPORT_OK ],
+	'edit'	=> [ @edit_export ],
+	'std'	=> [ @std_export ],
+	'abr'	=> [ @abbrev_export ],
+) ;
+
+@EXPORT = @std_export ;
 
 my $max_fast_slurp_size = 1024 * 100 ;
 
@@ -87,6 +112,7 @@ BEGIN {
 
 
 *slurp = \&read_file ;
+*rf = \&read_file ;
 
 sub read_file {
 
@@ -207,6 +233,11 @@ sub read_file {
 
 		my $read_cnt = sysread( $read_fh, ${$buf_ref},
 				$size_left, length ${$buf_ref} ) ;
+
+# since we're using sysread Perl won't automatically restart the call
+# when interrupted by a signal.
+
+		next if $!{EINTR};
 
 		unless ( defined $read_cnt ) {
 
@@ -341,6 +372,8 @@ ERR
 	return ;
 }
 
+
+*wf = \&write_file ;
 
 sub write_file {
 
@@ -485,6 +518,11 @@ sub write_file {
 		my $write_cnt = syswrite( $write_fh, ${$buf_ref},
 				$size_left, $offset ) ;
 
+# since we're using syswrite Perl won't automatically restart the call
+# when interrupted by a signal.
+
+		next if $!{EINTR};
+
 		unless ( defined $write_cnt ) {
 
 			@_ = ( $opts, "write_file '$file_name' - syswrite: $!");
@@ -605,6 +643,8 @@ sub prepend_file {
 
 # edit a file as a scalar in $_
 
+*ef = \&edit_file ;
+
 sub edit_file(&$;$) {
 
 	my( $edit_code, $file_name, $opts ) = @_ ;
@@ -657,6 +697,8 @@ sub edit_file(&$;$) {
 
 	return $write_result ;
 }
+
+*efl = \&edit_file_lines ;
 
 sub edit_file_lines(&$;$) {
 
@@ -806,8 +848,8 @@ File::Slurp - Simple and Efficient Reading/Writing/Modifying of Complete Files
 
 # Here is a simple and fast way to load and save a simple config file
 # made of key=value lines.
-  my %conf = read_file( $file_name ) =~ /^(\w+)=(\.*)$/mg ;
-  write_file( $file_name, {atomic => 1}, map "$_=$conf{$_}\n", keys %conf ;
+  my %conf = read_file( $file_name ) =~ /^(\w+)=(.*)$/mg ;
+  write_file( $file_name, {atomic => 1}, map "$_=$conf{$_}\n", keys %conf ) ;
 
 # insert text at the beginning of a file
   prepend_file( 'filename', $text ) ;
@@ -947,7 +989,7 @@ an already open handle (like \*STDIN). It defaults to 1MB.
 
 You can use this option to control how read_file behaves when an error
 occurs. This option defaults to 'croak'. You can set it to 'carp' or to
-'quiet to have no special error handling. This code wants to carp and
+'quiet' to have no special error handling. This code wants to carp and
 then read another file if it fails.
 
 	my $text_ref = read_file( $file, err_mode => 'carp' ) ;
@@ -956,7 +998,7 @@ then read another file if it fails.
 		# read a different file but croak if not found
 		$text_ref = read_file( $another_file ) ;
 	}
-	
+
 	# process ${$text_ref}
 
 =head2 B<write_file>
@@ -1125,8 +1167,12 @@ them is that C<edit_file> reads the whole file into $_ and calls the
 code block one time. With C<edit_file_lines> each line is read into $_
 and the code is called for each line. In both cases the code should
 modify $_ if desired and it will be written back out. These subs are
-the equivilent of the -pi command line options of Perl but you can
-call them from inside your program and not fork out a process.
+the equivalent of the -pi command line options of Perl but you can
+call them from inside your program and not fork out a process. They
+are in @EXPORT_OK so you need to request them to be imported on the
+use line or you can import both of them with:
+
+	use File::Slurp qw( :edit ) ;
 
 The first argument to C<edit_file> and C<edit_file_lines> is a code
 block or a code reference. The code block is not followed by a comma
@@ -1141,16 +1187,17 @@ C<write_file> call has the C<atomic> option set so you will always
 have a consistant file. See above for more about those options.
 
 Each group of calls below show a Perl command line instance and the
-equivilent calls to C<edit_file> and C<edit_file_lines>.
+equivalent calls to C<edit_file> and C<edit_file_lines>.
 
 	perl -0777 -pi -e 's/foo/bar/g' filename
-	use File::Slurp ;
+	use File::Slurp qw( edit_file ) ;
 	edit_file { s/foo/bar/g } 'filename' ;
 	edit_file sub { s/foo/bar/g }, 'filename' ;
 	edit_file \&replace_foo, 'filename' ;
 	sub replace_foo { s/foo/bar/g }
 
-	perl -pi -e '$_ = '' if /foo/' filename
+	perl -pi -e '$_ = "" if /foo/' filename
+	use File::Slurp qw( edit_file_lines ) ;
 	use File::Slurp ;
 	edit_file_lines { $_ = '' if /foo/ } 'filename' ;
 	edit_file_lines sub { $_ = '' if /foo/ }, 'filename' ;
@@ -1196,7 +1243,18 @@ of entries when opening themn.
 
 =head2 EXPORT
 
+  These are exported by default or with
+	use File::Slurp qw( :std ) ;
+
   read_file write_file overwrite_file append_file read_dir
+
+  These are exported with
+	use File::Slurp qw( :edit ) ;
+
+  edit_file edit_file_lines
+
+  You can get all subs in the module exported with 
+	use File::Slurp qw( :all ) ;
 
 =head2 LICENSE
 

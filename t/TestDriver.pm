@@ -4,16 +4,19 @@ use Test::More ;
 
 BEGIN {
 	*CORE::GLOBAL::syswrite =
-	sub(*\$$;$) { my( $h, $b, $s ) = @_; CORE::syswrite $h, $b, $s } ;
+	sub($$$;$) { my( $h, $b, $s, $o ) = @_; CORE::syswrite $h, $b, $s, $o} ;
+#	sub(*\$$;$) { my( $h, $b, $s, $o ) = @_; CORE::syswrite $h, $b, $s, $o } ;
 
 	*CORE::GLOBAL::sysread =
-	sub(*\$$;$) { my( $h, $b, $s ) = @_; CORE::sysread $h, $b, $s } ;
+	sub($$$;$) { my( $h, $b, $s, $o ) = @_; CORE::sysread $h, $b, $s, $o } ;
+#	sub(*\$$;$) { my( $h, $b, $s, $o ) = @_; CORE::sysread $h, $b, $s, $o } ;
 
 	*CORE::GLOBAL::rename =
 	sub($$) { my( $old, $new ) = @_; CORE::rename $old, $new } ;
 
 	*CORE::GLOBAL::sysopen =
-	sub(*$$;$) { my( $h, $n, $m, $p ) = @_; CORE::sysopen $h, $n, $m, $p } ;
+	sub($$$;$) { my( $h, $n, $m, $p ) = @_; CORE::sysopen $h, $n, $m, $p } ;
+#	sub(*$$;$) { my( $h, $n, $m, $p ) = @_; CORE::sysopen $h, $n, $m, $p } ;
 }
 
 sub test_driver {
