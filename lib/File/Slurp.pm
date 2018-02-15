@@ -901,14 +901,14 @@ If the file argument is a handle (if it is a ref and is an IO or GLOB
 object), then that handle is slurped in. This mode is supported so you
 slurp handles such as C<DATA> and C<STDIN>. See the test handle.t for
 an example that does C<open( '-|' )> and the child process spews data
-to the parant which slurps it in.  All of the options that control how
+to the parent which slurps it in.  All of the options that control how
 the data is returned to the caller still work in this case.
 
 If the first argument is an overloaded object then its stringified value
 is used for the filename and that file is opened.  This is a new feature
 in 9999.14. See the stringify.t test for an example.
 
-By default C<read_file> returns an undef in scalar contex or a single
+By default C<read_file> returns an undef in scalar context or a single
 undef in list context if it encounters an error. Those are both
 impossible to get with a clean read_file call which means you can check
 the return value and always know if you had an error. You can change how
@@ -1148,7 +1148,7 @@ data to be written to the file and that is passed to C<write_file> as is
 
 Only the C<binmode> and C<err_mode> options are supported. The
 C<write_file> call has the C<atomic> option set so you will always have
-a consistant file. See above for more about those options.
+a consistent file. See above for more about those options.
 
 C<prepend_file> is not exported by default, you need to import it
 explicitly.
@@ -1184,7 +1184,7 @@ C<prepend_file>.
 
 Only the C<binmode> and C<err_mode> options are supported. The
 C<write_file> call has the C<atomic> option set so you will always
-have a consistant file. See above for more about those options.
+have a consistent file. See above for more about those options.
 
 Each group of calls below show a Perl command line instance and the
 equivalent calls to C<edit_file> and C<edit_file_lines>.
@@ -1237,7 +1237,7 @@ list of files.
 If this boolean option is set, the string "$dir/" is prefixed to each
 dir entry. This means you can directly use the results to open
 files. A common newbie mistake is not putting the directory in front
-of entries when opening themn.
+of entries when opening them.
 
 	my @paths = read_dir( '/path/to/dir', prefix => 1 ) ;
 
