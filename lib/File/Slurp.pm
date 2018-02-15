@@ -25,12 +25,12 @@ my @std_export = qw(
 	read_dir
 ) ;
 
-my @edit_export = qw( 
+my @edit_export = qw(
 	edit_file
 	edit_file_lines
 ) ;
 
-my @ok_export = qw( 
+my @ok_export = qw(
 ) ;
 
 my @abbrev_export = qw(
@@ -555,7 +555,7 @@ sub write_file {
 	return 1 ;
 }
 
-# this is for backwards compatibility with the previous File::Slurp module. 
+# this is for backwards compatibility with the previous File::Slurp module.
 # write_file always overwrites an existing file
 
 *overwrite_file = \&write_file ;
@@ -854,7 +854,7 @@ File::Slurp - Simple and Efficient Reading/Writing/Modifying of Complete Files
 # insert text at the beginning of a file
   prepend_file( 'filename', $text ) ;
 
-# in-place edit to replace all 'foo' with 'bar' in file 
+# in-place edit to replace all 'foo' with 'bar' in file
   edit_file { s/foo/bar/g } 'filename' ;
 
 # in-place edit to delete all lines with 'foo' from file
@@ -1180,7 +1180,7 @@ block or a code reference. The code block is not followed by a comma
 comma. See the examples below for both styles. The next argument is
 the filename. The last argument is an optional hash reference and it
 contains key/values that can modify the behavior of
-C<prepend_file>. 
+C<prepend_file>.
 
 Only the C<binmode> and C<err_mode> options are supported. The
 C<write_file> call has the C<atomic> option set so you will always
@@ -1253,7 +1253,7 @@ of entries when opening themn.
 
   edit_file edit_file_lines
 
-  You can get all subs in the module exported with 
+  You can get all subs in the module exported with
 	use File::Slurp qw( :all ) ;
 
 =head2 LICENSE
