@@ -889,7 +889,7 @@ current value of $/ as the separator including support for paragraph
 mode when it is set to '').
 
   my $text = read_file( 'filename' ) ;
-  my $bin = read_file( 'filename' { binmode => ':raw' } ) ;
+  my $bin = read_file( 'filename', { binmode => ':raw' } ) ;
   my @lines = read_file( 'filename' ) ;
   my $lines = read_file( 'filename', array_ref => 1 ) ;
 

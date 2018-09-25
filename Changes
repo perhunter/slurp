@@ -1,11 +1,14 @@
 Revision history File::Slurp
 
+	- Fixed spelling mistakes in POD.
+	- Fixed a typo in an example (RT #80279)
+
 9999.19	  Tue Jun  7 04:06:06 EDT 2011
 	- Fixed use line in t/edit_file.t to import :edit first
 	  Thanks to paul
 	- read_file and write_file work even when interrupted by signals
 	  this includes a test for read_file interrupt
-	  Thanks to Andrew Danforth 
+	  Thanks to Andrew Danforth
 	- Fixed bugs in the config synopsis example
 
 9999.18	  Fri May 13 02:30:05 EDT 2011
@@ -63,10 +66,10 @@ Revision history File::Slurp
 	  and save memory due to not making a copy
 		Thanks to Peter Edwards
 	- read_file in list mode keeps data tainted
-		Thanks to Sébastien Aperghis-Tramoni
+		Thanks to Sï¿½bastien Aperghis-Tramoni
 	- read_file checks for an overloaded object to get the file
-	  name. 
-		Thanks to Sébastien Aperghis-Tramoni
+	  name.
+		Thanks to Sï¿½bastien Aperghis-Tramoni
 
 9999.13   Tue Oct 10 02:04:51 EDT 2006
 	- Refactored the extras/slurp_bench.pl script. It has options,
@@ -98,7 +101,7 @@ Revision history File::Slurp
 	  defined in perl 5.004
 	- File::Slurp now runs on perl 5.004 and newer (see BUGS section)
 	  All of the above thanks to Smylers <Smylers@stripey.com>,
-	  Piers Kent <piers.kent@bbc.co.uk> and 
+	  Piers Kent <piers.kent@bbc.co.uk> and
 	  John Alden <john.alden@bbc.co.uk>
 	- Added pod.t and pod_coverage.t tests. This is to pass all
 	  the CPANTS tests.
@@ -164,4 +167,3 @@ Revision history File::Slurp
 9999.01  Mon Sep  1 00:20:56 2003
 	- original version; created by h2xs 1.21 with options
 		-AX -n File::FastSlurp
-
