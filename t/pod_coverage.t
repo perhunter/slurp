@@ -19,6 +19,10 @@ all_pod_coverage_ok(
 			'SEEK_CUR',
 			'SEEK_END',
 			'SEEK_SET',
+			'ef',
+			'efl',
+			'rf',
+			'wf',
 		],
 	}
 ) ;

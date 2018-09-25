@@ -3,6 +3,7 @@ Revision history File::Slurp
 	- Fixed spelling mistakes in POD (RT #85251)
 	- Fixed a typo in an example (RTs #72116, #80279)
 	- Remove doc mentions of Perl < 5.006 as that's required.
+	- Fix POD coverage tests by adding a few more ignored functions
 
 9999.19	  Tue Jun  7 04:06:06 EDT 2011
 	- Fixed use line in t/edit_file.t to import :edit first
