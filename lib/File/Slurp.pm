@@ -1265,11 +1265,6 @@ of entries when opening them.
 An article on file slurping in extras/slurp_article.pod. There is
 also a benchmarking script in extras/slurp_bench.pl.
 
-=head2 BUGS
-
-If run under Perl 5.004, slurping from the DATA handle will fail as
-that requires B.pm which didn't get into core until 5.005.
-
 =head1 AUTHOR
 
 Uri Guttman, E<lt>uri AT stemsystems DOT comE<gt>
