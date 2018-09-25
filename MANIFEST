@@ -7,10 +7,8 @@ TODO
 t/TestDriver.pm
 t/append_null.t
 t/binmode.t
-t/chomp.t
 t/data_list.t
 t/data_scalar.t
-t/edit_file.t
 t/error.t
 t/error_mode.t
 t/file_object.t
@@ -27,7 +25,6 @@ t/pod_coverage.t
 t/prepend_file.t
 t/pseudo.t
 t/read_dir.t
-t/signal.t
 t/slurp.t
 t/stdin.t
 t/stringify.t
