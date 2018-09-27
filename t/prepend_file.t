@@ -65,6 +65,90 @@ my $tests = [
 		},
 		posttest => sub { $_[0]->{result} = read_file( $file ) },
 	},
+	{
+		name	=> 'prepend line; empty options hashref',
+		sub	=> \&prepend_file,
+		prepend_data => "line 0\n",
+		pretest	=> sub {
+			my( $test ) = @_ ;
+			write_file( $file, $existing_data ) ;
+			my $prepend_data = $test->{prepend_data} ;
+			$test->{args} = [
+				$file,
+                {},
+				$prepend_data,
+			] ;
+			$test->{expected} = "$prepend_data$existing_data" ;
+		},
+		posttest => sub { $_[0]->{result} = read_file( $file ) },
+	},
+	{
+		name	=> 'prepend line; invalid options',
+		sub	=> \&prepend_file,
+		prepend_data => "line 0\n",
+		pretest	=> sub {
+			my( $test ) = @_ ;
+			write_file( $file, $existing_data ) ;
+			my $prepend_data = $test->{prepend_data} ;
+			$test->{args} = [
+				$file,
+                { foo => 1, bar => 0 },
+				$prepend_data,
+			] ;
+			$test->{expected} = "$prepend_data$existing_data" ;
+		},
+		posttest => sub { $_[0]->{result} = read_file( $file ) },
+	},
+	{
+		name	=> 'prepend line; invalid options; binmode',
+		sub	=> \&prepend_file,
+		prepend_data => "line 0\n",
+		pretest	=> sub {
+			my( $test ) = @_ ;
+			write_file( $file, $existing_data ) ;
+			my $prepend_data = $test->{prepend_data} ;
+			$test->{args} = [
+				$file,
+                { foo => 1, bar => 0, binmode => ':raw' },
+				$prepend_data,
+			] ;
+			$test->{expected} = "$prepend_data$existing_data" ;
+		},
+		posttest => sub { $_[0]->{result} = read_file( $file ) },
+	},
+	{
+		name	=> 'prepend line; invalid options; err_mode',
+		sub	=> \&prepend_file,
+		prepend_data => "line 0\n",
+		pretest	=> sub {
+			my( $test ) = @_ ;
+			write_file( $file, $existing_data ) ;
+			my $prepend_data = $test->{prepend_data} ;
+			$test->{args} = [
+				$file,
+                { foo => 1, bar => 0, err_mode => 'quiet' },
+				$prepend_data,
+			] ;
+			$test->{expected} = "$prepend_data$existing_data" ;
+		},
+		posttest => sub { $_[0]->{result} = read_file( $file ) },
+	},
+	{
+		name	=> 'prepend line: text in ref to scalar',
+		sub	=> \&prepend_file,
+		prepend_data => "line 0\n",
+		pretest	=> sub {
+			my( $test ) = @_ ;
+			write_file( $file, $existing_data ) ;
+			my $prepend_data = $test->{prepend_data} ;
+			$test->{args} = [
+				$file,
+				\$prepend_data,
+			] ;
+			$test->{expected} = "$prepend_data$existing_data" ;
+		},
+		posttest => sub { $_[0]->{result} = read_file( $file ) },
+	},
 ] ;
 
 test_driver( $tests ) ;
