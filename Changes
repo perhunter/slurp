@@ -6,6 +6,7 @@ Revision history File::Slurp
 	- Fix POD coverage tests by adding a few more ignored functions
 	- Added t/edit_file.t (James Keenen)
 	- Move the POD tests to xt/author
+	- Update t/append_null.t
 
 9999.19	  Tue Jun  7 04:06:06 EDT 2011
 	- Fixed use line in t/edit_file.t to import :edit first

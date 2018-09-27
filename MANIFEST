@@ -35,3 +35,4 @@ t/stringify.t
 t/tainted.t
 t/TestDriver.pm
 t/write_file_win32.t
+xt/author/pod_coverage.t
