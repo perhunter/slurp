@@ -14,3 +14,5 @@ File-Slurp.*
 pm_to_blib
 MYMETA.*
 newline.txt
+*.swp
+cover_db/
