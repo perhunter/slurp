@@ -8,9 +8,10 @@ blib/
 *gz
 *.tar
 *.new
+*.bak
 Makefile
 *.old
-File-Slurp.*
+File-Slurp*
 pm_to_blib
 MYMETA.*
 newline.txt

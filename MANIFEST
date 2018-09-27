@@ -1,10 +1,13 @@
+.mailmap
 Changes
 lib/File/Slurp.pm
 Makefile.PL
 MANIFEST
+MANIFEST.SKIP
+META.yml			Module meta-data (added by MakeMaker)
+MYMETA.json
+MYMETA.yml
 README
-TODO
-t/TestDriver.pm
 t/append_null.t
 t/binmode.t
 t/data_list.t
@@ -30,8 +33,5 @@ t/slurp.t
 t/stdin.t
 t/stringify.t
 t/tainted.t
+t/TestDriver.pm
 t/write_file_win32.t
-extras/slurp_bench.pl
-extras/FileSlurp_12.pm
-extras/slurp_article.pod
-META.yml                                 Module meta-data (added by MakeMaker)

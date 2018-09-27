@@ -1,10 +1,27 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         File-Slurp
-version:      9999.12
-version_from: lib/File/Slurp.pm
-installdirs:  site
+---
+abstract: 'Simple and Efficient Reading/Writing/Modifying of Complete Files'
+author:
+  - 'Uri Guttman <uri@stemsystems.com>'
+build_requires:
+  ExtUtils::MakeMaker: '0'
+configure_requires:
+  ExtUtils::MakeMaker: '0'
+dynamic_config: 1
+generated_by: 'ExtUtils::MakeMaker version 7.34, CPAN::Meta::Converter version 2.150010'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: '1.4'
+name: File-Slurp
+no_index:
+  directory:
+    - t
+    - inc
 requires:
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+  Carp: '0'
+  Exporter: '0'
+  Fcntl: '0'
+  POSIX: '0'
+  perl: '5.004'
+version: '9999.20'
+x_serialization_backend: 'CPAN::Meta::YAML version 0.018'
