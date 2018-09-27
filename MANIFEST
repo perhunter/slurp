@@ -9,6 +9,7 @@ t/append_null.t
 t/binmode.t
 t/data_list.t
 t/data_scalar.t
+t/edit_file.t
 t/error.t
 t/error_mode.t
 t/file_object.t
