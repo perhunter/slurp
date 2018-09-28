@@ -1,59 +1,110 @@
-##!/usr/local/bin/perl -w
+use strict;
+use warnings;
 
-use strict ;
-use File::Slurp ;
+use Carp;
+use File::Spec ();
+use File::Slurp;
+# use File::Temp qw(tempfile);
+use IO::Handle ();
+use Test::More;
 
-use Carp ;
-use Test::More tests => 9 ;
+plan tests => 27;
 
-my $file = 'missing/file' ;
-#unlink $file ;
-
-
-my %modes = (
-	'croak' => \&test_croak,
-	'carp' => \&test_carp,
-	'quiet' => \&test_quiet,
-) ;
-
-while( my( $mode, $sub ) = each %modes ) {
-
-	$sub->( 'read_file', \&read_file, $file, err_mode => $mode ) ;
-	$sub->( 'write_file', \&write_file, $file,
-					{ err_mode => $mode }, 'junk' ) ;
-	$sub->( 'read_dir', \&read_dir, $file, err_mode => $mode ) ;
+{ # read_dir errors
+    # this one intentionally doesn't exist on a couple of paths. can't be created.
+    my $file = File::Spec->catfile(File::Spec->tmpdir, 'super', 'bad', 'file-spec', 'path');
+    my ($res, $warn, $err) = trap_read_dir($file, 'quiet');
+    ok(!$warn, 'read_dir: err_mode opt quiet - no warn!');
+    ok(!$err, 'read_dir: err_mode opt quiet - no exception!');
+    ok(!$res, 'read_dir: err_mode opt quiet - no content!');
+    ($res, $warn, $err) = trap_read_dir($file, 'carp');
+    ok($warn, 'read_dir: err_mode opt carp - got warn!');
+    ok(!$err, 'read_dir: err_mode opt carp - no exception!');
+    ok(!$res, 'read_dir: err_mode opt carp - no content!');
+    ($res, $warn, $err) = trap_read_dir($file, 'croak');
+    ok(!$warn, 'read_dir: err_mode opt croak - no warn!');
+    ok($err, 'read_dir: err_mode opt croak - got exception!');
+    ok(!$res, 'read_dir: err_mode opt croak - no content!');
 }
 
-
-sub test_croak {
-
-	my ( $name, $sub, @args ) = @_ ;
-
-	eval {
-		$sub->( @args ) ;
-	} ;
-
-	ok( $@, "$name can croak" ) ;
+{ # read_file errors
+    # this one intentionally doesn't exist on a couple of paths. can't be created.
+    my $file = File::Spec->catfile(File::Spec->tmpdir, 'super', 'bad', 'file-spec', 'path');
+    my ($res, $warn, $err) = trap_read_file($file, 'quiet');
+    ok(!$warn, 'read_file: err_mode opt quiet - no warn!');
+    ok(!$err, 'read_file: err_mode opt quiet - no exception!');
+    ok(!$res, 'read_file: err_mode opt quiet - no content!');
+    ($res, $warn, $err) = trap_read_file($file, 'carp');
+    ok($warn, 'read_file: err_mode opt carp - got warn!');
+    ok(!$err, 'read_file: err_mode opt carp - no exception!');
+    ok(!$res, 'read_file: err_mode opt carp - no content!');
+    ($res, $warn, $err) = trap_read_file($file, 'croak');
+    ok(!$warn, 'read_file: err_mode opt croak - no warn!');
+    ok($err, 'read_file: err_mode opt croak - got exception!');
+    ok(!$res, 'read_file: err_mode opt croak - no content!');
 }
 
-sub test_carp {
-
-	my ( $name, $sub, @args ) = @_ ;
-
-	local $SIG{__WARN__} = sub { ok( 1, "$name can carp" ) } ;
-
-	$sub->( @args ) ;
+{ # write_file errors
+    # this one intentionally doesn't exist on a couple of paths. can't be created.
+    my $file = File::Spec->catfile(File::Spec->tmpdir, 'super', 'bad', 'file-spec', 'path');
+    my ($res, $warn, $err) = trap_write_file($file, 'quiet');
+    ok(!$warn, 'write_file: err_mode opt quiet - no warn!');
+    ok(!$err, 'write_file: err_mode opt quiet - no exception!');
+    ok(!$res, 'write_file: err_mode opt quiet - no content!');
+    ($res, $warn, $err) = trap_write_file($file, 'carp');
+    ok($warn, 'write_file: err_mode opt carp - got warn!');
+    ok(!$err, 'write_file: err_mode opt carp - no exception!');
+    ok(!$res, 'write_file: err_mode opt carp - no content!');
+    ($res, $warn, $err) = trap_write_file($file, 'croak');
+    ok(!$warn, 'write_file: err_mode opt croak - no warn!');
+    ok($err, 'write_file: err_mode opt croak - got exception!');
+    ok(!$res, 'write_file: err_mode opt croak - no content!');
 }
 
-sub test_quiet {
+sub trap_read_dir {
+    my ($file, $mode) = @_;
+    my $res;
+    my $warn;
+    my $err = do { # catch
+        local $@;
+        local $SIG{__WARN__} = sub {$warn = join '', @_};
+        eval { # try
+            $res = read_dir($file, err_mode => $mode);
+            1;
+        };
+        $@;
+    };
+    return ($res, $warn, $err);
+}
 
-	my ( $name, $sub, @args ) = @_ ;
+sub trap_read_file {
+    my ($file, $mode) = @_;
+    my $res;
+    my $warn;
+    my $err = do { # catch
+        local $@;
+        local $SIG{__WARN__} = sub {$warn = join '', @_};
+        eval { # try
+            $res = read_file($file, err_mode => $mode);
+            1;
+        };
+        $@;
+    };
+    return ($res, $warn, $err);
+}
 
-	local $SIG{__WARN__} = sub { ok( 0, "$name can be quiet" ) } ;
-
-	eval {
-		$sub->( @args ) ;
-	} ;
-
-	ok( !$@, "$name can be quiet" ) ;
+sub trap_write_file {
+    my ($file, $mode) = @_;
+    my $res;
+    my $warn;
+    my $err = do { # catch
+        local $@;
+        local $SIG{__WARN__} = sub {$warn = join '', @_};
+        eval { # try
+            $res = write_file($file, {err_mode => $mode}, 'junk');
+            1;
+        };
+        $@;
+    };
+    return ($res, $warn, $err);
 }

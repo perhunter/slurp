@@ -10,6 +10,7 @@ Revision history File::Slurp
 	- Update t/binmode.t
 	- Update t/data_list.t
 	- Update t/data_scalar.t
+	- Update t/error_mode.t
 
 9999.19	  Tue Jun  7 04:06:06 EDT 2011
 	- Fixed use line in t/edit_file.t to import :edit first
