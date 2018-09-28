@@ -1,7 +1,8 @@
 Revision history File::Slurp
 
 9999.20_02     2018-09-28  (TRIAL)
-	- 
+	- Update TravisCI tests to show coverage.
+	- Update t/no_clobber.t
 
 9999.20_01     2018-09-27  (TRIAL)
 	- Fixed spelling mistakes in POD (RT #85251)

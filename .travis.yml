@@ -1,3 +1,4 @@
+sudo: false
 addons:
   apt:
     packages:
@@ -30,7 +31,24 @@ perl:
   - "5.8"
   - "5.8-thr"
 env:
-  - "HARNESS_OPTIONS=j9"
+  global:
+    - TEST_PARTITIONS=4
+    - AUTHOR_TESTING=1
+    - AUTOMATED_TESTING=1
+    - RELEASE_TESTING=1
+matrix:
+  include:
+    - perl: "5.20"
+      env: COVERAGE=1 TEST_PARTITION=1
+    - perl: "5.20"
+      env: COVERAGE=1 TEST_PARTITION=2
+    - perl: "5.20"
+      env: COVERAGE=1 TEST_PARTITION=3
+    - perl: "5.20"
+      env: COVERAGE=1 TEST_PARTITION=4
+cache:
+  directories:
+    - $HOME/perl5
 before_install:
   - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
   - source ~/travis-perl-helpers/init --always-upgrade-modules
@@ -39,10 +57,13 @@ before_install:
   - build-dist
   - cd $BUILD_DIR
 install:
-  - cpan-install --deps
+  - cpan-install --deps Test::Spelling Test::Pod Test::Pod::Coverage Test::Version Test::EOL
+  - cpan-install --coverage
+before_script:
+  - coverage-setup
 script:
   - perl Makefile.PL
-  - prove -lrb t/ xt/
-sudo: false
-notifications:
-  email: false
+  - make
+  - prove -v -r -b -s -j$(test-jobs) $(test-files)
+after_success:
+  - coverage-report
