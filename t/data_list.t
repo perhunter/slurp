@@ -1,52 +1,30 @@
-#!/usr/local/bin/perl -w
+use strict;
+use warnings;
 
-use strict ;
-use File::Slurp ;
-
-use Carp ;
+use File::Spec ();
+use File::Slurp;
+use File::Temp qw(tempfile);
 use POSIX qw( :fcntl_h ) ;
-use Test::More tests => 1 ;
+use Test::More;
 
-# in case SEEK_SET isn't defined in older perls. it seems to always be 0
+plan tests => 5;
 
-BEGIN {
-
-	*SEEK_SET = sub { 0 } unless defined \&SEEK_SET ;
-}
-
-SKIP: {
-
-	eval { require B } ;
-
-	skip <<TEXT, 1 if $@ ;
-B.pm not found in this Perl. This will cause slurping of
-the DATA handle to fail.
-TEXT
-
-	test_data_list_slurp() ;
-}
-
-exit ;
-
-
-sub test_data_list_slurp {
-
-	my $data_seek = tell( \*DATA );
+# get the current position (BYTES)_
+my $data_seek = tell(\*DATA);
+ok($data_seek, 'tell: find position of __DATA__');
 
 # first slurp in the lines
+my @slurp_lines = read_file(\*DATA);
+ok(@slurp_lines, 'read_file: list context - grabbed __DATA__');
 
-	my @slurp_lines = read_file( \*DATA ) ;
+# seek back to that inital BYTES position
+my $res = seek(\*DATA, $data_seek, 0) || die "seek $!" ;
+ok($res, 'seek: Move back to original __DATA__ position');
+my @data_lines = <DATA>;
+ok(@data_lines, 'readfile<>: list context - grabbed __DATA__');
 
-# now seek back and read all the lines with the <> op and we make
-# golden data sets
-
-	seek( \*DATA, $data_seek, SEEK_SET ) || die "seek $!" ;
-	my @data_lines = <DATA> ;
-
-# test the array slurp
-
-	ok( eq_array( \@data_lines, \@slurp_lines ), 'list slurp of DATA' ) ;
-}
+is_deeply(\@slurp_lines, \@data_lines, 'both reads match');
+exit;
 
 __DATA__
 line one

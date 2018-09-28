@@ -5,8 +5,6 @@ Makefile.PL
 MANIFEST
 MANIFEST.SKIP
 META.yml			Module meta-data (added by MakeMaker)
-MYMETA.json
-MYMETA.yml
 README
 t/append_null.t
 t/binmode.t
@@ -24,8 +22,6 @@ t/no_clobber.t
 t/original.t
 t/paragraph.t
 t/perms.t
-t/pod.t
-t/pod_coverage.t
 t/prepend_file.t
 t/pseudo.t
 t/read_dir.t
