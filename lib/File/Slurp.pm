@@ -3,6 +3,9 @@ package File::Slurp;
 use strict;
 use warnings ;
 
+our $VERSION = '9999.20_01';
+$VERSION = eval $VERSION;
+
 use Carp ;
 use Exporter ;
 use Fcntl qw( :DEFAULT ) ;
@@ -10,10 +13,8 @@ use POSIX qw( :fcntl_h ) ;
 use Errno ;
 #use Symbol ;
 
-use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION ) ;
+use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS  ) ;
 @ISA = qw( Exporter ) ;
-
-$VERSION = '9999.20';
 
 my @std_export = qw(
 	read_file

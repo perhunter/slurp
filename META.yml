@@ -3,7 +3,21 @@ abstract: 'Simple and Efficient Reading/Writing/Modifying of Complete Files'
 author:
   - 'Uri Guttman <uri@stemsystems.com>'
 build_requires:
+  B: '0'
+  Carp: '0'
+  Exporter: '0'
   ExtUtils::MakeMaker: '0'
+  File::Spec: '0'
+  File::Temp: '0'
+  IO::Handle: '0'
+  POSIX: '0'
+  Scalar::Util: '0'
+  Socket: '0'
+  Symbol: '0'
+  Test::More: '0'
+  overload: '0'
+  strict: '0'
+  warnings: '0'
 configure_requires:
   ExtUtils::MakeMaker: '0'
 dynamic_config: 1
@@ -18,10 +32,13 @@ no_index:
     - t
     - inc
 requires:
+  B: '0'
   Carp: '0'
+  Errno: '0'
   Exporter: '0'
   Fcntl: '0'
   POSIX: '0'
-  perl: '5.004'
+  strict: '0'
+  warnings: '0'
 version: '9999.20'
 x_serialization_backend: 'CPAN::Meta::YAML version 0.018'

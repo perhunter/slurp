@@ -1,4 +1,7 @@
+.appveyor.cmd
+.appveyor.yml
 .mailmap
+.travis.yml
 Changes
 lib/File/Slurp.pm
 Makefile.PL

@@ -1,5 +1,6 @@
 Revision history File::Slurp
 
+9999.20_01     2018-09-27  (TRIAL)
 	- Fixed spelling mistakes in POD (RT #85251)
 	- Fixed a typo in an example (RTs #72116, #80279)
 	- Remove doc mentions of Perl < 5.006 as that's required.
@@ -18,6 +19,7 @@ Revision history File::Slurp
 	- Added more xt/author tests
 	- Fix all trailing whitespace in accordance with xt/author/eol.t
 	- Updated the Makefile.PL to get all of the prereqs in there.
+	- Add CI testing via TravisCI and AppVeyor
 
 9999.19	  Tue Jun  7 04:06:06 EDT 2011
 	- Fixed use line in t/edit_file.t to import :edit first

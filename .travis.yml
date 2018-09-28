@@ -1,0 +1,48 @@
+addons:
+  apt:
+    packages:
+      - aspell
+      - aspell-en
+language: perl
+perl:
+  - "blead"
+  - "blead-thr"
+  - "5.28"
+  - "5.28-thr"
+  - "5.26"
+  - "5.26-thr"
+  - "5.24"
+  - "5.24-thr"
+  - "5.22"
+  - "5.22-thr"
+  - "5.20"
+  - "5.20-thr"
+  - "5.18"
+  - "5.18-thr"
+  - "5.16"
+  - "5.16-thr"
+  - "5.14"
+  - "5.14-thr"
+  - "5.12"
+  - "5.12-thr"
+  - "5.10"
+  - "5.10-thr"
+  - "5.8"
+  - "5.8-thr"
+env:
+  - "HARNESS_OPTIONS=j9"
+before_install:
+  - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
+  - source ~/travis-perl-helpers/init --always-upgrade-modules
+  - build-perl
+  - perl -V
+  - build-dist
+  - cd $BUILD_DIR
+install:
+  - cpan-install --deps
+script:
+  - perl Makefile.PL
+  - prove -lrb t/ xt/
+sudo: false
+notifications:
+  email: false
