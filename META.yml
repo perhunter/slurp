@@ -40,5 +40,5 @@ requires:
   POSIX: '0'
   strict: '0'
   warnings: '0'
-version: '9999.20'
+version: 9999.20_02
 x_serialization_backend: 'CPAN::Meta::YAML version 0.018'
