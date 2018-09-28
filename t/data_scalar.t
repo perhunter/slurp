@@ -1,52 +1,33 @@
-#!/usr/local/bin/perl -w
+use strict;
+use warnings;
 
-use strict ;
-use File::Slurp ;
-
-use Carp ;
+use File::Spec ();
+use File::Slurp;
+use File::Temp qw(tempfile);
+use IO::Handle ();
 use POSIX qw( :fcntl_h ) ;
-use Test::More tests => 1 ;
+use Test::More;
 
-# in case SEEK_SET isn't defined in older perls. it seems to always be 0
+plan tests => 5;
 
-BEGIN {
-
-	*SEEK_SET = sub { 0 } unless defined \&SEEK_SET ;
-}
-
-eval { require B } ;
-
-SKIP: {
-
-	skip <<TEXT, 1 if $@ ;
-B.pm not found in this Perl. Note this will cause slurping of
-the DATA handle to fail.
-TEXT
-
-	test_data_scalar_slurp() ;
-}
-
-exit ;
-
-
-
-exit ;
-
-sub test_data_scalar_slurp {
-
-	my $data_seek = tell( \*DATA );
+# get the current position (BYTES)_
+my $data_seek = tell(\*DATA);
+ok($data_seek, 'tell: find position of __DATA__');
 
 # first slurp in the text
- 
-	my $slurp_text = read_file( \*DATA ) ;
+my $slurp_text = read_file(\*DATA);
+ok($slurp_text, 'read_file: scalar context - grabbed __DATA__');
 
 # now we need to get the golden data
+# seek back to that inital BYTES position
+my $res = seek(\*DATA, $data_seek, 0) || die "seek $!" ;
+ok($res, 'seek: Move back to original __DATA__ position');
+my $data_text = join('', <DATA>);
+ok($data_text, 'readfile<>: list context, joined - grabbed __DATA__');
 
-	seek( \*DATA, $data_seek, SEEK_SET ) || die "seek $!" ;
-	my $data_text = join( '', <DATA> ) ;
+is($slurp_text, $data_text, 'both reads match');
 
-	is( $slurp_text, $data_text, 'scalar slurp of DATA' ) ;
-}
+exit();
 
 __DATA__
 line one
