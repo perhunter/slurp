@@ -7,9 +7,9 @@ my $data = "\r\n\r\n\r\n" ;
 my $file_name = 'newline.txt' ;
 
 stdio_write_file( $file_name, $data ) ;
-my $slurped_data = read_file( $file_name ) ; 
+my $slurped_data = read_file( $file_name ) ;
 
-my $stdio_slurped_data = stdio_read_file( $file_name ) ; 
+my $stdio_slurped_data = stdio_read_file( $file_name ) ;
 
 
 print 'data ', unpack( 'H*', $data), "\n",
@@ -19,7 +19,7 @@ print 'data ', unpack( 'H*', $data), "\n",
 is( $data, $slurped_data, 'slurp' ) ;
 
 write_file( $file_name, $data ) ;
-$slurped_data = stdio_read_file( $file_name ) ; 
+$slurped_data = stdio_read_file( $file_name ) ;
 
 is( $data, $slurped_data, 'spew' ) ;
 
@@ -48,5 +48,3 @@ sub stdio_read_file {
 
 	return $data ;
 }
-
-

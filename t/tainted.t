@@ -27,7 +27,7 @@ SKIP: {
 #         # reconstruct the full lines by merging items by pairs
 #         for my $k (0..int($#lines/2)) {
 #             my $i = $k * 2;
-#             $lines[$k] = (defined $lines[$i]   ? $lines[$i]   : '') 
+#             $lines[$k] = (defined $lines[$i]   ? $lines[$i]   : '')
 #                        . (defined $lines[$i+1] ? $lines[$i+1] : '');
 #         }
 

@@ -5,7 +5,10 @@ Makefile.PL
 MANIFEST
 MANIFEST.SKIP
 META.yml			Module meta-data (added by MakeMaker)
+MYMETA.json
+MYMETA.yml
 README
+t/00-report-prereqs.t
 t/append_null.t
 t/binmode.t
 t/data_list.t
@@ -31,4 +34,9 @@ t/stringify.t
 t/tainted.t
 t/TestDriver.pm
 t/write_file_win32.t
+xt/author/00-compile.t
+xt/author/eol.t
+xt/author/pod-spell.t
+xt/author/pod-syntax.t
 xt/author/pod_coverage.t
+xt/author/test-version.t

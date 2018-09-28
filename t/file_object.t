@@ -59,7 +59,7 @@ SKIP: {
 unlink $path;
 
 
-# the following mimics the parts from Path::Class causing 
+# the following mimics the parts from Path::Class causing
 # problems with File::Slurp
 package FileObject;
 use overload
@@ -72,4 +72,3 @@ sub new {
 sub stringify {
     return $_[0]->{path}
 }
-

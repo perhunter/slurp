@@ -9,7 +9,7 @@ use Socket ;
 use Symbol ;
 use Test::More ;
 
-BEGIN { 
+BEGIN {
 	if( $^O =~ '32' ) {
 		plan skip_all => 'skip inode test on windows';
 		exit ;

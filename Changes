@@ -11,6 +11,13 @@ Revision history File::Slurp
 	- Update t/data_list.t
 	- Update t/data_scalar.t
 	- Update t/error_mode.t
+	- Update t/large.t
+	- Update t/original.t
+	- Update t/stringify.t
+	- Added t/00-report-prereqs.t
+	- Added more xt/author tests
+	- Fix all trailing whitespace in accordance with xt/author/eol.t
+	- Updated the Makefile.PL to get all of the prereqs in there.
 
 9999.19	  Tue Jun  7 04:06:06 EDT 2011
 	- Fixed use line in t/edit_file.t to import :edit first
