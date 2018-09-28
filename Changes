@@ -1,11 +1,14 @@
 Revision history File::Slurp
 
+9999.20_02     2018-09-28  (TRIAL)
+	- 
+
 9999.20_01     2018-09-27  (TRIAL)
 	- Fixed spelling mistakes in POD (RT #85251)
 	- Fixed a typo in an example (RTs #72116, #80279)
 	- Remove doc mentions of Perl < 5.006 as that's required.
 	- Fix POD coverage tests by adding a few more ignored functions
-	- Added t/edit_file.t (James Keenen)
+	- Added t/edit_file.t (James Keenan)
 	- Move the POD tests to xt/author
 	- Update t/append_null.t
 	- Update t/binmode.t
