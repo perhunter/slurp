@@ -15,19 +15,21 @@ my %ConfigReqs = (
 my %DevReqs = (
     "Test::Pod" => 0,
     "Test::Pod::Coverage" => 0,
+    "Test::Spelling" => 0,
+    "Test::Version" => 0,
 );
 my %TestReqs = (
     "overload" => 0,
     "strict" => 0,
     "warnings" => 0,
-    "B" => 0,
     "Carp" => 0,
     'Exporter' => 0,
+    "File::Basename" => 0,
     "File::Spec" => 0,
     "File::Temp" => 0,
     "IO::Handle" => 0,
     "POSIX" => 0,
-    "Scalar::Util" => 0,
+    "Scalar::Util" => '1.00', # had tainted()
     "Socket" => 0,
     "Symbol" => 0,
     "Test::More" => 0,
@@ -60,7 +62,7 @@ my %WriteMakefileArgs = (
 );
 
 unless ( eval { ExtUtils::MakeMaker->VERSION('6.63_03') } ) {
-    my %fallback = (%prereqs, %TestReqs, %ConfigReqs, %BuildReqs);
+    my %fallback = (%prereqs, %TestReqs, %BuildReqs);
     delete $WriteMakefileArgs{TEST_REQUIRES};
     delete $WriteMakefileArgs{BUILD_REQUIRES};
     $WriteMakefileArgs{PREREQ_PM} = \%fallback;

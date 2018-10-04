@@ -1,8 +1,16 @@
 Revision history File::Slurp
 
-9999.20_02     2018-09-28  (TRIAL)
+9999.20_02     2018-10-03  (TRIAL)
 	- Update TravisCI tests to show coverage.
-	- Update t/no_clobber.t
+	- Update all remaining test files
+	- Get rid of assumption of . in @INC in tests
+	- Remove t/TestDriver.pm
+	- Add t/lib/FileSlurpTest.pm
+	- Make sure all tests use a properly acquired temp file
+	- Clean up prereqs a bit further
+	- Document all failure cases in the 01-error* tests.
+	- Moved the CORE:: function overrides to their own test class to only be
+	  included when overriding is necessary
 
 9999.20_01     2018-09-27  (TRIAL)
 	- Fixed spelling mistakes in POD (RT #85251)
