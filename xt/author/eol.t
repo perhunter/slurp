@@ -7,6 +7,7 @@ use Test::More 0.88;
 use Test::EOL;
 
 my @files = (
+    'lib/File/Slurp.pm',
     't/00-report-prereqs.t',
     't/01-error_edit_file.t',
     't/01-error_edit_file_lines.t',
@@ -24,6 +25,7 @@ my @files = (
     't/inode.t',
     't/large.t',
     't/lib/FileSlurpTest.pm',
+    't/lib/FileSlurpTestOverride.pm',
     't/newline.t',
     't/no_clobber.t',
     't/original.t',

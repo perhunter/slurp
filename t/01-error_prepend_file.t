@@ -4,7 +4,8 @@ use warnings;
 use File::Basename ();
 use File::Spec ();
 use lib File::Spec->catdir(File::Spec->rel2abs(File::Basename::dirname(__FILE__)), 'lib');
-use FileSlurpTest qw(temp_file_path trap_function trap_function_override_core);
+use FileSlurpTestOverride qw(trap_function_override_core);
+use FileSlurpTest qw(temp_file_path trap_function);
 
 use File::Slurp qw(prepend_file);
 use Test::More;
