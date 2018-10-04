@@ -9,6 +9,8 @@ Revision history File::Slurp
 	- Make sure all tests use a properly acquired temp file
 	- Clean up prereqs a bit further
 	- Document all failure cases in the 01-error* tests.
+	- Moved the CORE:: function overrides to their own test class to only be
+	  included when overriding is necessary
 
 9999.20_01     2018-09-27  (TRIAL)
 	- Fixed spelling mistakes in POD (RT #85251)
