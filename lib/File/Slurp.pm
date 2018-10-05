@@ -9,6 +9,7 @@ $VERSION = eval $VERSION;
 use Carp ;
 use Exporter ;
 use Fcntl qw( :DEFAULT ) ;
+use File::Spec;
 use POSIX qw( :fcntl_h ) ;
 use Errno ;
 #use Symbol ;
@@ -778,7 +779,7 @@ sub read_dir {
 
 	if ( $opts->{'prefix'} ) {
 
-		substr( $_, 0, 0, "$dir/" ) for @dir_entries ;
+		$_ = File::Spec->catfile($dir, $_) for @dir_entries;
 	}
 
 	return @dir_entries if wantarray ;
