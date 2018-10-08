@@ -8,8 +8,6 @@ Makefile.PL
 MANIFEST
 MANIFEST.SKIP
 META.yml			Module meta-data (added by MakeMaker)
-MYMETA.json
-MYMETA.yml
 README
 t/00-report-prereqs.t
 t/01-error_edit_file.t
