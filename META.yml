@@ -43,7 +43,7 @@ requires:
   warnings: '0'
 resources:
   repository: https://github.com/perhunter/slurp.git
-version: '9999.21'
+version: 9999.22_01
 x_contributors:
   - 'Chase Whitener <capoeirab@cpan.org>'
   - 'Graham Knop <haarg@haarg.org>'
