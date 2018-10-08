@@ -8,6 +8,10 @@ use Test::More;
 
 plan(tests => 8);
 
+# older EUMMs turn this on. We don't want to emit warnings.
+# also, some of our CORE function overrides emit warnings. Silence those.
+local $^W;
+
 my (undef, $tmp) = tempfile('tempXXXXX', DIR => File::Spec->tmpdir, OPEN => 0);
 
 my $short = <<END;

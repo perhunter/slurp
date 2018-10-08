@@ -1,7 +1,8 @@
 Revision history File::Slurp
 
 9999.20_03     2018-10-04  (TRIAL)
-	-
+	- Unset $^W in a few strategic places to silence warnings when Test::Harness
+	  or ExtUtils::MakeMaker turn them on. (Thanks, Graham Knop).
 
 9999.20_02     2018-10-04  (TRIAL)
 	- Update TravisCI tests to show coverage.

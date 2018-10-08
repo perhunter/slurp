@@ -23,9 +23,13 @@ sub IS_WSL() {
 sub temp_file_path {
     my ($pick_nonsense_path) = @_;
 
+    # older EUMMs turn this on. We don't want to emit warnings.
+    # also, some of our CORE function overrides emit warnings. Silence those.
+    local $^W;
+
     my $file;
     if ($pick_nonsense_path) {
-        $file = File::Spec->catfile(File::Spec->tmpdir, 'super', 'bad', 'file-spec', 'path');
+        $file = File::Spec->catfile(File::Spec->tmpdir, 'super', 'bad', 'file-slurp', 'path');
     }
     else {
         (undef, $file) = tempfile('tempXXXXX', DIR => File::Spec->tmpdir, OPEN => 0);

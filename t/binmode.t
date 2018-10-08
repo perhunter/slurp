@@ -12,6 +12,11 @@ BEGIN {
     plan skip_all => 'Older Perl lacking unicode support' if $] < 5.008001;
 }
 
+# older EUMMs turn this on. We don't want to emit warnings.
+# also, some of our CORE function overrides emit warnings. Silence those.
+local $^W;
+
+
 plan tests => 4;
 
 my $suf = 'utf8';

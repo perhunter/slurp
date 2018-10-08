@@ -2,6 +2,10 @@ package FileSlurpTestOverride;
 
 use Exporter qw(import);
 
+# older EUMMs turn this on. We don't want to emit warnings.
+# also, some of our CORE function overrides emit warnings. Silence those.
+local $^W;
+
 BEGIN {
     *CORE::GLOBAL::rename = sub($$) { my ($o, $n) = @_; CORE::rename($o, $n) };
     # we only use the 4-arg version of syswrite
