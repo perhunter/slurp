@@ -12,6 +12,10 @@ use Test::More;
 
 plan tests => 27;
 
+# older EUMMs turn this on. We don't want to emit warnings.
+# also, some of our CORE function overrides emit warnings. Silence those.
+local $^W;
+
 # prepend_file reads in a file, edits the contents, writes the new file
 # atomically to "foo.$$" then renames "foo.$$" to the original "foo"
 # this leaves many failure steps to tend to

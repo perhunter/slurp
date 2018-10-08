@@ -7,6 +7,10 @@ use File::Slurp;
 use File::Temp qw(tempfile);
 use Test::More;
 
+# older EUMMs turn this on. We don't want to emit warnings.
+# also, some of our CORE function overrides emit warnings. Silence those.
+local $^W;
+
 my @text_data = (
     [],
     [ 'a' x 8 ],

@@ -13,6 +13,9 @@ use Test::More;
 plan tests => 30;
 
 my $is_win32 = $^O =~ /cygwin|win32/i ;
+# older EUMMs turn this on. We don't want to emit warnings.
+# also, some of our CORE function overrides emit warnings. Silence those.
+local $^W;
 
 # write_file open error - no sysopen
 {
