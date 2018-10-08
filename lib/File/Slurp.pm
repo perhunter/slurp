@@ -834,33 +834,33 @@ File::Slurp - Simple and Efficient Reading/Writing/Modifying of Complete Files
 
   use File::Slurp;
 
-# read in a whole file into a scalar
+  # read in a whole file into a scalar
   my $text = read_file( 'filename' ) ;
 
-# read in a whole file into an array of lines
+  # read in a whole file into an array of lines
   my @lines = read_file( 'filename' ) ;
 
-# write out a whole file from a scalar
+  # write out a whole file from a scalar
   write_file( 'filename', $text ) ;
 
-# write out a whole file from an array of lines
+  # write out a whole file from an array of lines
   write_file( 'filename', @lines ) ;
 
-# Here is a simple and fast way to load and save a simple config file
-# made of key=value lines.
+  # Here is a simple and fast way to load and save a simple config file
+  # made of key=value lines.
   my %conf = read_file( $file_name ) =~ /^(\w+)=(.*)$/mg ;
   write_file( $file_name, {atomic => 1}, map "$_=$conf{$_}\n", keys %conf ) ;
 
-# insert text at the beginning of a file
+  # insert text at the beginning of a file
   prepend_file( 'filename', $text ) ;
 
-# in-place edit to replace all 'foo' with 'bar' in file
+  # in-place edit to replace all 'foo' with 'bar' in file
   edit_file { s/foo/bar/g } 'filename' ;
 
-# in-place edit to delete all lines with 'foo' from file
+  # in-place edit to delete all lines with 'foo' from file
   edit_file_lines sub { $_ = '' if /foo/ }, 'filename' ;
 
-# read in a whole directory of file names (skipping . and ..)
+  # read in a whole directory of file names (skipping . and ..)
   my @files = read_dir( '/path/to/dir' ) ;
 
 =head1 DESCRIPTION
