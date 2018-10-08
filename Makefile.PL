@@ -48,7 +48,7 @@ my %prereqs = (
 my %WriteMakefileArgs = (
     'NAME' => 'File::Slurp',
     "DISTNAME" => "File-Slurp",
-    'LICENSE' => 'perl',
+    'LICENSE' => 'perl_5',
     'AUTHOR' => 'Uri Guttman <uri@stemsystems.com>',
     'VERSION_FROM' => 'lib/File/Slurp.pm',
     'ABSTRACT_FROM' => 'lib/File/Slurp.pm',
@@ -87,5 +87,11 @@ unless ( eval { ExtUtils::MakeMaker->VERSION('6.63_03') } ) {
 
 delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
   unless eval { ExtUtils::MakeMaker->VERSION('6.52') };
+
+delete $WriteMakefileArgs{META_MERGE}
+  unless eval { ExtUtils::MakeMaker->VERSION('6.46') };
+
+delete $WriteMakefileArgs{LICENSE}
+  unless eval { ExtUtils::MakeMaker->VERSION('6.31') };
 
 WriteMakefile(%WriteMakefileArgs);
