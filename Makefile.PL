@@ -52,6 +52,23 @@ my %WriteMakefileArgs = (
     'AUTHOR' => 'Uri Guttman <uri@stemsystems.com>',
     'VERSION_FROM' => 'lib/File/Slurp.pm',
     'ABSTRACT_FROM' => 'lib/File/Slurp.pm',
+    'META_MERGE' => {
+        'dynamic_config' => 0,
+        'meta-spec' => {version => 2},
+        'no_index' => {directory => ['xt']},
+        'resources' => {
+            repository => {
+                type => 'git',
+                url  => 'https://github.com/perhunter/slurp.git',
+                web  => 'https://github.com/perhunter/slurp',
+            },
+        },
+        'x_contributors' => [
+            'Chase Whitener <capoeirab@cpan.org>',
+            'Graham Knop <haarg@haarg.org>',
+            'James E Keenan <jkeenan@cpan.org>',
+        ],
+    },
     "BUILD_REQUIRES" => \%BuildReqs,
     "CONFIGURE_REQUIRES" => \%ConfigReqs,
     "TEST_REQUIRES" => \%TestReqs,

@@ -20,7 +20,7 @@ build_requires:
   warnings: '0'
 configure_requires:
   ExtUtils::MakeMaker: '0'
-dynamic_config: 1
+dynamic_config: 0
 generated_by: 'ExtUtils::MakeMaker version 7.34, CPAN::Meta::Converter version 2.150010'
 license: perl
 meta-spec:
@@ -31,6 +31,7 @@ no_index:
   directory:
     - t
     - inc
+    - xt
 requires:
   B: '0'
   Carp: '0'
@@ -40,5 +41,11 @@ requires:
   POSIX: '0'
   strict: '0'
   warnings: '0'
-version: 9999.20_03
+resources:
+  repository: https://github.com/perhunter/slurp.git
+version: '9999.21'
+x_contributors:
+  - 'Chase Whitener <capoeirab@cpan.org>'
+  - 'Graham Knop <haarg@haarg.org>'
+  - 'James E Keenan <jkeenan@cpan.org>'
 x_serialization_backend: 'CPAN::Meta::YAML version 0.018'

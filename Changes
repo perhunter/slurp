@@ -1,8 +1,11 @@
 Revision history File::Slurp
 
-9999.20_03     2018-10-04  (TRIAL)
+9999.21    2018-10-08
 	- Unset $^W in a few strategic places to silence warnings when Test::Harness
 	  or ExtUtils::MakeMaker turn them on. (Thanks, Graham Knop).
+	- Got rid of a few MYMETA leftovers in the MANIFEST
+	- Add Git repository info to the Makefile
+	- Add a contributor's list for display on metacpan
 
 9999.20_02     2018-10-04  (TRIAL)
 	- Update TravisCI tests to show coverage.
