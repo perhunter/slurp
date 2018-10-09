@@ -9,7 +9,6 @@ plan skip_all =>
 all_pod_coverage_ok(
 	{
 		trustme =>	[
-			'slurp',
 			'O_APPEND',
 			'O_BINARY',
 			'O_CREAT',
@@ -19,10 +18,6 @@ all_pod_coverage_ok(
 			'SEEK_CUR',
 			'SEEK_END',
 			'SEEK_SET',
-			'ef',
-			'efl',
-			'rf',
-			'wf',
 		],
 	}
 ) ;

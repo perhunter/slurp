@@ -8,7 +8,7 @@ Makefile.PL
 MANIFEST
 MANIFEST.SKIP
 META.yml			Module meta-data (added by MakeMaker)
-README
+README.md
 t/00-report-prereqs.t
 t/01-error_edit_file.t
 t/01-error_edit_file_lines.t

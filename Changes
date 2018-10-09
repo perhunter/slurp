@@ -1,7 +1,9 @@
 Revision history File::Slurp
 
 9999.22_01     2018-10-09  (TRIAL)
-	- 
+	- Update the SYNOPSIS documentation. (Graham Knop)
+	- Fix some EUMM metadata depending on version. (Dan Book)
+	- Fix Windows path concatenation on read_dir. (James Keenan)
 
 9999.21    2018-10-08
 	- Unset $^W in a few strategic places to silence warnings when Test::Harness
