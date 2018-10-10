@@ -65,6 +65,7 @@ my %WriteMakefileArgs = (
         },
         'x_contributors' => [
             'Chase Whitener <capoeirab@cpan.org>',
+            'Dan Book <grinnz@gmail.com>',
             'Graham Knop <haarg@haarg.org>',
             'James E Keenan <jkeenan@cpan.org>',
         ],
