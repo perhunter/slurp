@@ -62,55 +62,6 @@ my $max_fast_slurp_size = 1024 * 100 ;
 
 my $is_win32 = $^O =~ /win32/i ;
 
-# Install subs for various constants that aren't set in older perls
-# (< 5.005).  Fcntl on old perls uses Exporter to define subs without a
-# () prototype These can't be overridden with the constant pragma or
-# we get a prototype mismatch.  Hence this less than aesthetically
-# appealing BEGIN block:
-
-BEGIN {
-	unless( defined &SEEK_SET ) {
-		*SEEK_SET = sub { 0 };
-		*SEEK_CUR = sub { 1 };
-		*SEEK_END = sub { 2 };
-	}
-
-	unless( defined &O_BINARY ) {
-		*O_BINARY = sub { 0 };
-		*O_RDONLY = sub { 0 };
-		*O_WRONLY = sub { 1 };
-	}
-
-	unless ( defined &O_APPEND ) {
-
-		if ( $^O =~ /olaris/ ) {
-			*O_APPEND = sub { 8 };
-			*O_CREAT = sub { 256 };
-			*O_EXCL = sub { 1024 };
-		}
-		elsif ( $^O =~ /inux/ ) {
-			*O_APPEND = sub { 1024 };
-			*O_CREAT = sub { 64 };
-			*O_EXCL = sub { 128 };
-		}
-		elsif ( $^O =~ /BSD/i ) {
-			*O_APPEND = sub { 8 };
-			*O_CREAT = sub { 512 };
-			*O_EXCL = sub { 2048 };
-		}
-	}
-}
-
-# print "OS [$^O]\n" ;
-
-# print "O_BINARY = ", O_BINARY(), "\n" ;
-# print "O_RDONLY = ", O_RDONLY(), "\n" ;
-# print "O_WRONLY = ", O_WRONLY(), "\n" ;
-# print "O_APPEND = ", O_APPEND(), "\n" ;
-# print "O_CREAT   ", O_CREAT(), "\n" ;
-# print "O_EXCL   ", O_EXCL(), "\n" ;
-
-
 *slurp = \&read_file ;
 *rf = \&read_file ;
 
