@@ -36,7 +36,7 @@ requires:
   B: '0'
   Carp: '0'
   Errno: '0'
-  Exporter: '0'
+  Exporter: '5.57'
   Fcntl: '0'
   POSIX: '0'
   strict: '0'

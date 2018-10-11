@@ -8,6 +8,7 @@ Revision history File::Slurp
 	- Dump the POD to GH markdown for a README.md
 	- Remove the README file
 	- Remove some work-arounds for older Perls < 5.6
+	- Do not inherit from Exporter (requires Exporter 5.57)
 
 9999.21    2018-10-08
 	- Unset $^W in a few strategic places to silence warnings when Test::Harness

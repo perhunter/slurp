@@ -7,15 +7,11 @@ our $VERSION = '9999.22_01';
 $VERSION = eval $VERSION;
 
 use Carp ;
-use Exporter ;
+use Exporter qw(import);
 use Fcntl qw( :DEFAULT ) ;
 use File::Spec;
 use POSIX qw( :fcntl_h ) ;
 use Errno ;
-#use Symbol ;
-
-use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS  ) ;
-@ISA = qw( Exporter ) ;
 
 my @std_export = qw(
 	read_file
@@ -30,9 +26,6 @@ my @edit_export = qw(
 	edit_file_lines
 ) ;
 
-my @ok_export = qw(
-) ;
-
 my @abbrev_export = qw(
 	rf
 	wf
@@ -40,7 +33,7 @@ my @abbrev_export = qw(
 	efl
 ) ;
 
-@EXPORT_OK = (
+our @EXPORT_OK = (
 	@edit_export,
 	@abbrev_export,
 	qw(
@@ -49,14 +42,14 @@ my @abbrev_export = qw(
 	),
 ) ;
 
-%EXPORT_TAGS = (
+our %EXPORT_TAGS = (
 	'all'	=> [ @std_export, @edit_export, @abbrev_export, @EXPORT_OK ],
 	'edit'	=> [ @edit_export ],
 	'std'	=> [ @std_export ],
 	'abr'	=> [ @abbrev_export ],
 ) ;
 
-@EXPORT = @std_export ;
+our @EXPORT = @std_export ;
 
 my $max_fast_slurp_size = 1024 * 100 ;
 
