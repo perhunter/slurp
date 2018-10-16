@@ -63,7 +63,7 @@
          }
       }
    },
-   "release_status" : "unstable",
+   "release_status" : "stable",
    "resources" : {
       "repository" : {
          "type" : "git",
@@ -71,8 +71,9 @@
          "web" : "https://github.com/perhunter/slurp"
       }
    },
-   "version" : "9999.22_01",
+   "version" : "9999.22",
    "x_contributors" : [
+      "Aristotle Pagaltzis <ARISTOTLE@cpan.org>",
       "Chase Whitener <capoeirab@cpan.org>",
       "Dan Book <grinnz@gmail.com>",
       "Graham Knop <haarg@haarg.org>",
