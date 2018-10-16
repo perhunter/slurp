@@ -1,5 +1,7 @@
 Revision history File::Slurp
 
+9999.23     2018-10-15
+
 9999.22     2018-10-15
 	- Update the SYNOPSIS documentation. (Graham Knop)
 	- Fix some EUMM metadata depending on version. (Dan Book)
