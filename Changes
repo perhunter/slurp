@@ -1,6 +1,8 @@
 Revision history File::Slurp
 
 9999.23     2018-10-15
+	- Fix an error on the test rewrites with a bad value for binmode
+	- Create a 00-report-prereqs.dd to ease testing on 5.6
 
 9999.22     2018-10-15
 	- Update the SYNOPSIS documentation. (Graham Knop)

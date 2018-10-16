@@ -1,0 +1,45 @@
+do { my $x = {
+       'build' => {
+                    'requires' => {
+                                    'ExtUtils::MakeMaker' => '0',
+                                  }
+                  },
+       'configure' => {
+                        'requires' => {
+                                        'ExtUtils::MakeMaker' => '0'
+                                      }
+                      },
+       'runtime' => {
+                      'requires' => {
+                                      'B' => '0',
+                                      'Carp' => '0',
+                                      'Errno' => '0',
+                                      'Exporter' => '5.57',
+                                      'Fcntl' => '0',
+                                      'POSIX' => '0',
+                                      'strict' => '0',
+                                      'warnings' => '0'
+                                    }
+                    },
+       'test' => {
+                   'requires' => {
+                                   'Carp' => '0',
+                                   'Exporter' => '5.57',
+                                   'Fcntl' => '0',
+                                   'File::Basename' => '0',
+                                   'File::Spec' => '0',
+                                   'File::Temp' => '0',
+                                   'IO::Handle' => '0',
+                                   'POSIX' => '0',
+                                   'Scalar::Util' => '0',
+                                   'Socket' => '0',
+                                   'Symbol' => '0',
+                                   'Test::More' => '0',
+                                   'overload' => '0',
+                                   'strict' => '0',
+                                   'warnings' => '0'
+                                 }
+                 }
+     };
+  $x;
+ }
