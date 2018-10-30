@@ -1,5 +1,8 @@
 Revision history File::Slurp
 
+9999.25     2018-10-29
+    - 
+
 9999.24     2018-10-29
     - Document the clear downfalls of using file handles of any kind rather
       than just the file's path string.
