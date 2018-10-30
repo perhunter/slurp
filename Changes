@@ -1,7 +1,8 @@
 Revision history File::Slurp
 
 9999.24     2018-10-20
-    -
+    - Document the clear downfalls of using file handles of any kind rather
+      than just the file's path string.
 
 9999.23     2018-10-20
     - Fix an error on the test rewrites with a bad value for binmode
