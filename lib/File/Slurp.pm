@@ -818,7 +818,7 @@ directory.
 =head2 WARNING - PENDING DOOM
 
 Although you technically I<can>, do NOT use this module to work on file handles,
-pipes, sockets, standard IO, pseudo-files, or the C<DATA> handle. These are
+pipes, sockets, standard IO, or the C<DATA> handle. These are
 features implemented long ago that just really shouldn't be abused here.
 
 Be warned: this activity will lead to inaccurate encoding/decoding of data.
