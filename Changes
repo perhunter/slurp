@@ -4,6 +4,8 @@ Revision history File::Slurp
     - The previous release contained nothing but a documentation update. That
       updated documentation errantly mentioned pseudo-files. Pseudo-files
       are perfectly fine to use with File::Slurp.
+    - Add regression test for GLOB refs being slurped in. Thank you, James Keenan!
+      https://github.com/perhunter/slurp/pull/17#issuecomment-437174592
 
 9999.24     2018-10-29
     - Document the clear downfalls of using file handles of any kind rather
