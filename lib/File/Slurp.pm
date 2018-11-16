@@ -843,7 +843,7 @@ L<File::Slurp/"write_file"> function.
 	use File::Slurp qw(prepend_file);
 	prepend_file('/path/file', $header);
 	prepend_file('/path/file', \@lines);
-	prepend_file('/path/file', { binmode => 'raw:'}, $bin_data);
+	prepend_file('/path/file', { binmode => ':raw'}, $bin_data);
 
 	# equivalent to:
 	use File::Slurp qw(read_file write_file);
