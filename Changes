@@ -1,5 +1,7 @@
 Revision history File::Slurp
 
+9999.26     2018-11-16
+
 9999.25     2018-11-16
     - The previous release contained nothing but a documentation update. That
       updated documentation errantly mentioned pseudo-files. Pseudo-files
