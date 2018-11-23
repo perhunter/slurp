@@ -30,6 +30,7 @@ t/lib/FileSlurpTest.pm
 t/lib/FileSlurpTestOverride.pm
 t/lib/FSGlobby.pm
 t/newline.t
+t/newline_binmode.t
 t/no_clobber.t
 t/original.t
 t/paragraph.t
