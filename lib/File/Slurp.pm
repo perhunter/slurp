@@ -772,7 +772,7 @@ reference is followed by a comma.
 
 The next argument is the filename.
 
-The next argument(s) is either a hash reference or a flattened hash,
+The next argument is an optional hash reference of
 C<< key => value >> pairs. The options are passed through to the
 L<File::Slurp/"write_file"> function. All options are described there.
 Only the C<binmode> and C<err_mode> options are supported. The call to
@@ -799,7 +799,7 @@ code reference is followed by a comma.
 
 The next argument is the filename.
 
-The next argument(s) is either a hash reference or a flattened hash,
+The next argument is an optional hash reference of
 C<< key => value >> pairs. The options are passed through to the
 L<File::Slurp/"write_file"> function. All options are described there.
 Only the C<binmode> and C<err_mode> options are supported. The call to
@@ -859,7 +859,7 @@ C<write_file> with the new data and the existing file data.
 
 The first argument to C<prepend_file> is the filename.
 
-The next argument(s) is either a hash reference or a flattened hash,
+The next argument is an optional hash reference of
 C<< key => value >> pairs. The options are passed through to the
 L<File::Slurp/"write_file"> function. All options are described there.
 
@@ -1073,7 +1073,7 @@ an error. You can change how errors are handled with the C<err_mode> option.
 
 The first argument to C<write_file> is the filename.
 
-The next argument(s) is either a hash reference or a flattened hash,
+The next argument is an optional hash reference of
 C<< key => value >> pairs. The following options are available:
 
 =over
