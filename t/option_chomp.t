@@ -9,6 +9,7 @@ use FileSlurpTest qw(temp_file_path);
 
 use File::Slurp qw(read_file write_file);
 use Test::More;
+plan tests => 9;
 
 # -------- Prelude: Set up expected data and write a data file
 my $expected = <<TEXT;
@@ -84,8 +85,3 @@ my $file = temp_file_path();
 #     my $in_data = join '', @got;
 #     is($in_data,$expected,"fixed record mode, no chomping");
 # }
-
-
-
-
-done_testing;
