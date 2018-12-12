@@ -9,7 +9,7 @@ use FileSlurpTest qw(temp_file_path);
 
 use File::Slurp qw(read_file write_file);
 use Test::More;
-plan tests => 9;
+plan tests => 7;
 
 # -------- Prelude: Set up expected data and write a data file
 my $expected = <<TEXT;
@@ -69,19 +69,3 @@ my $file = temp_file_path();
     is(scalar @got,3,"paragraph mode splits into three paragraphs");
     isnt(substr($got[2],-1,1),"\n","paragraph mode chomps trailing line feed");
 }
-
-{
-    local $/;
-    my @got = read_file($file, {chomp => 1});
-    is(scalar @got,1,'slurp mode by undefined $/ yields one "line"');
-    is($got[0],$expected,"slurp mode by undefined \$/ doesn't chomp");
-}
-
-# read_file doesn't handle fixed record lengths
-# {
-#     local $/ = \24;
-#     my @got = read_file($file, {chomp => 0});
-#     is(scalar @got,10,"fixed record mode, ten paragraphs");
-#     my $in_data = join '', @got;
-#     is($in_data,$expected,"fixed record mode, no chomping");
-# }

@@ -124,15 +124,10 @@ sub read_file {
 	if ($want_array || $opts->{array_ref}) {
 		use re 'taint';
 		my $sep = $/;
-		my @lines;
-		if (defined $sep) {
-			$sep ='\n\n+' if $sep eq '';
-			@lines = length(${$buf_ref}) ?
-				${$buf_ref} =~ /(.*?$sep|.+)/sg : ();
-		}
-		else {
-			@lines = (${$buf_ref});
-		}
+		$sep = '\n\n+' if defined $sep && $sep eq '';
+		# split the buffered content into lines
+		my @lines = length(${$buf_ref}) ?
+			${$buf_ref} =~ /(.*?$sep|.+)/sg : ();
 		chomp @lines if $opts->{chomp};
 		return \@lines if $opts->{array_ref};
 		return @lines;
@@ -945,10 +940,9 @@ ensure the proper directory separator is used for your OS. See L<File::Spec>.
 This function reads in an entire file and returns its contents to the caller.
 In list context, or in scalar context with the C<array_ref> option set, it
 splits the contents using the current value of C<$/> as the separator.
-Paragraph mode, when C<$/> is set to C<''>, is supported. If C<$/> is undefined,
-then the first and only element of the list contains the entire file.  Reading
-fixed length records with C<$/> set to a reference to an integer is not
-supported.
+Paragraph mode, when C<$/> is set to C<''>, is supported.  Note: Any value for
+C<$/> different from the default newline C<"\n"> and the empty string C<''>
+should not be used.
 
 In scalar context with the C<array_ref> option set to false, it returns the
 contents of the entire file as a scalar value.
