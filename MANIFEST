@@ -38,6 +38,7 @@ t/prepend_file.t
 t/pseudo.t
 t/read_dir.t
 t/slurp.t
+t/split.t
 t/stdin.t
 t/stringify.t
 t/tainted.t

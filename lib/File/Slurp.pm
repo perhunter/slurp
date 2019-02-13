@@ -127,13 +127,13 @@ sub read_file {
 	if ($want_array || $opts->{array_ref}) {
 		use re 'taint';
 		my $sep = $/;
-        if( defined $sep ) {
-            if( $sep eq '' ) {
-                $sep = '\n\n+' ;
-            } else {
-                $sep = quotemeta $sep;
-            }
-        };
+		if( defined $sep ) {
+			if( $sep eq '' ) {
+				$sep = '\n\n+' ;
+			} else {
+				$sep = quotemeta $sep;
+			}
+		};
 		# split the buffered content into lines
 		my @lines = length(${$buf_ref}) ?
 			${$buf_ref} =~ /(.*?$sep|.+)/sg : ();
