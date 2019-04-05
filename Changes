@@ -1,7 +1,8 @@
 Revision history File::Slurp
 
 9999.27     2019-02-13
-    -
+    - Update the documentation on the atomic write. We no longer use the pid
+      and I neglected to update the documentation as such.
 
 9999.26     2019-02-13
     - Reduce the size of handle.t to prevent failures on systems with limits set

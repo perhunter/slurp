@@ -1020,11 +1020,10 @@ atomic
 
 The C<atomic> option is a boolean option, defaulted to false (C<0>). Setting
 this option to true (C<1>) will cause the file to be be written to in an
-atomic fashion. A temporary file name is created by appending the pid
-(C<$$>) to the file name argument and that file is spewed to. After the
-file is closed it is renamed to the original file name (and C<rename> is
-an atomic operation on most OSes). If the program using this were to
-crash in the middle of this, then the file with the pid suffix could
+atomic fashion. A temporary file name is created using L<File::Temp/"tempfile">.
+After the file is closed it is renamed to the original file name
+(and C<rename> is an atomic operation on most OSes). If the program using
+this were to crash in the middle of this, then the temporary file could
 be left behind.
 
 =item
