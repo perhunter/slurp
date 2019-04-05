@@ -1,5 +1,8 @@
 Revision history File::Slurp
 
+9999.28     2019-04-05
+    -
+
 9999.27     2019-04-05
     - Update the documentation on the atomic write. We no longer use the pid
       and I neglected to update the documentation as such. (RT #129029)
