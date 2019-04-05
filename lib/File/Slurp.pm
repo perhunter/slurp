@@ -279,7 +279,10 @@ sub write_file {
 			}
 			# we must ensure we're using a good temporary filename (doesn't already
 			# exist). This is slower, but safer.
-			(undef, $file_name) = tempfile('tempXXXXX', DIR => $dir, OPEN => 0);
+			{
+				local $^W = 0; # AYFKM
+				(undef, $file_name) = tempfile('tempXXXXX', DIR => $dir, OPEN => 0);
+			}
 		}
 		$fh = local *FH;
 		unless (sysopen($fh, $file_name, $mode, $perms)) {
