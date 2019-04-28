@@ -614,7 +614,9 @@ File::Slurp - Simple and Efficient Reading/Writing/Modifying of Complete Files
   use File::Slurp;
 
   # read in a whole file into a scalar
-  my $text = read_file('/path/file');
+  my $bytes = read_file('/path/file');
+  # decode unicode at the same time
+  my $chars = read_file('/path/file', {binmode => ':encoding(UTF-8)'});
 
   # read in a whole file into an array of lines
   my @lines = read_file('/path/file');
@@ -649,6 +651,62 @@ with one simple call. They are designed to be simple to use, have
 flexible ways to pass in or get the file contents and to be very
 efficient. There is also a sub to read in all the files in a
 directory.
+
+=head2 PERL LAYERS
+
+L<File::Slurp> was written well before Perl layers (you can find more
+information about layers here: L<perlfunc/binmode>, L<PerlIO>, and
+L<perluniintro>). That being said, in our latest efforts to ensure that
+L<File::Slurp> would behave correctly when used with layers we ran into an
+issue with respect to line ending conversion on the Windows platform.
+
+When we open files, we use the C<:raw> Perl layer by default. We won't
+delve into the I<why> of this, but it breaks Perl's ability to do line
+ending conversion by default on Windows.
+
+  #!/usr/bin/env perl
+  use strict;
+  use warnings;
+  use File::Slurp qw(read_file);
+
+  my $bytes = read_file('/path/file');
+
+  # That line is functionally equivalent to the following code
+  # give or take some optimizations here and there
+  open my $fh, '<:raw', '/path/file' or die "Can't open $!";
+  my $bytes = do {local $/; <$fh>};
+
+  # to decode those (UTF-8) bytes in to characters, you would need
+  # to use the Encode module:
+  use Encode qw(find_encoding);
+  my $encoder = find_encoding('UTF-8');
+
+  # Now, you need to decode your bytes yourself:
+  $bytes = read_line('/path/file');
+  my $chars = $encoder->decode($bytes, Encode::FB_CROAK | Encode::LEAVE_SRC);
+
+  # using layers, you could have, instead, written:
+  my $chars = read_line('/path/file', {binmode => ':encoding(UTF-8)'});
+
+  # those two examples are functionally equivalent to the following block
+  open my $fh, '<:raw', '/path/file' or die "Can't open $!";
+  # yes, we know. There's a good reason for doing it this way.
+  # see the PENDING DOOM section below for a glimpse into it.
+  binmode $fh, ':encoding(UTF-8)';
+  # now, the read will decode the bytes into chars for us
+  my $chars = do {local $/; <$fh>};
+
+Now that we've covered what's going on in the module as opposed to writing
+things out by hand, "what's wrong with this on Windows?", you might ask.
+
+Well, in the past, before layers could convert line endings for you with
+the C<:crlf> layer, this module tried to do what you needed with a simple
+conversion:
+C<< $data =~ s/\015\012/\012/g if $is_win32 && !$opts->{binmode}; >>
+
+That conversion step did not take place if you supplied a
+C<binmode> option to L<File::Slurp/read_file>. If we alter the module now,
+we break certain edge cases in the behavior of the module on Windows.
 
 =head2 WARNING - PENDING DOOM
 
@@ -896,6 +954,10 @@ The C<binmode> option is a string option, defaulted to empty (C<''>). If you
 set the C<binmode> option, then its value is passed to a call to C<binmode> on
 the opened handle. You can use this to set the file to be read in binary mode,
 utf8, etc. See C<perldoc -f binmode> for more.
+
+Though the C<binmode> option defaults to the empty string, C<''>, the actual
+opening of the file will apply the C<:raw> layer first. This makes it somewhat
+equivalent to C<< open my $fh, '<:raw', '/path/file' >>.
 
 =item
 

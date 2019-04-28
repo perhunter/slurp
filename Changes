@@ -1,7 +1,9 @@
 Revision history File::Slurp
 
 9999.28     2019-04-05
-    -
+    - Further reduce the length of the handle.t tests to make testers happy
+    - Document the difference on Windows (RT#84918) behavior about Perl layers
+      not behaving as expected.
 
 9999.27     2019-04-05
     - Update the documentation on the atomic write. We no longer use the pid
