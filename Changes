@@ -1,5 +1,8 @@
 Revision history File::Slurp
-    -
+
+9999.29
+    - Correct some documentation errors where copy-paste had us saying
+      File::Spec rather than File::Slurp. (RT 131097 - Thanks, Mike)
 
 9999.28     2019-04-05
     - Stop testing with Taint mode. Taint was a terrible practice that should
