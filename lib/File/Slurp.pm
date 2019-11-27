@@ -3,7 +3,7 @@ package File::Slurp;
 use strict;
 use warnings ;
 
-our $VERSION = '9999.29';
+our $VERSION = '9999.30';
 $VERSION = eval $VERSION;
 
 use Carp ;
