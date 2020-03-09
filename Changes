@@ -1,5 +1,8 @@
 Revision history File::Slurp
 
+9999.31
+    -
+
 9999.30
     - Altered the atomic version of write_file to use temporary files that
       are also hidden files. (RT #132064)
