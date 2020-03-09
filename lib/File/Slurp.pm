@@ -1093,6 +1093,27 @@ You can get all subs in the module exported with
 
 	use File::Slurp qw(:all);
 
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+L<File::Slurper> - Provides a straightforward set of functions for the most
+common tasks of reading/writing text and binary files.
+
+=item *
+
+L<Path::Tiny> - Lightweight and comprehensive file handling, including simple
+methods for reading, writing, and editing text and binary files.
+
+=item *
+
+L<Mojo::File> - Similar to Path::Tiny for the L<Mojo> toolkit, always works in
+bytes.
+
+=back
+
 =head1 AUTHOR
 
 Uri Guttman, <F<uri@stemsystems.com>>
