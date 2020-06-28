@@ -1,7 +1,8 @@
 Revision history File::Slurp
 
 9999.31
-    -
+    - Remove TravisCI and AppVeyor
+    - Test using GitHub Actions/workflows on Windows, Mac, and Linux
 
 9999.30
     - Altered the atomic version of write_file to use temporary files that
