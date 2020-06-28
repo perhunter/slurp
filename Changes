@@ -4,6 +4,7 @@ Revision history File::Slurp
     - Remove TravisCI and AppVeyor
     - Test using GitHub Actions/workflows on Windows, Mac, and Linux
     - Add See Also section to the docs. (PR#24 Thanks, Dan Book)
+    - Add file existence and size checks (RT 132900 - Thanks, Bao Haojun)
 
 9999.30
     - Altered the atomic version of write_file to use temporary files that
