@@ -102,7 +102,7 @@ sub read_file {
 	my $buf_ref = $opts->{buf_ref} || \$buf;
 	${$buf_ref} = '';
 	my $blk_size = $opts->{blk_size} || 1024 * 1024;
-	if (my $size = -s $fh) {
+	if (my $size = -f $fh && -s _) {
 		$blk_size = $size if $size < $blk_size;
 		my ($pos, $read) = 0;
 		do {
