@@ -119,7 +119,7 @@ sub read_file {
 	seek($fh, $opts->{_data_tell}, SEEK_SET) if $opts->{_is_data} && $opts->{_data_tell};
 
 	# line endings if we're on Windows
-	${$buf_ref} =~ s/\015\012/\012/g if $is_win32 && !$opts->{binmode};
+	${$buf_ref} =~ s/\015\012/\012/g if ${$buf_ref} && $is_win32 && !$opts->{binmode};
 
 	# we now have a buffer filled with the file content. Figure out how to
 	# return it to the user
