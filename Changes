@@ -1,7 +1,7 @@
 Revision history File::Slurp
 
-9999.32
-    -
+9999.32     2020-06-30
+    - Re-release after fixing MANIFEST
 
 9999.31     2020-06-28
     - Remove TravisCI and AppVeyor
