@@ -701,7 +701,7 @@ reference is followed by a comma.
 
 The next argument is the filename.
 
-The next argument(s) is either a hash reference or a flattened hash,
+The next argument is an optional hash reference of
 C<< key => value >> pairs. The options are passed through to the
 L<File::Slurp/"write_file"> function. All options are described there.
 Only the C<binmode> and C<err_mode> options are supported. The call to
@@ -728,7 +728,7 @@ code reference is followed by a comma.
 
 The next argument is the filename.
 
-The next argument(s) is either a hash reference or a flattened hash,
+The next argument is an optional hash reference of
 C<< key => value >> pairs. The options are passed through to the
 L<File::Slurp/"write_file"> function. All options are described there.
 Only the C<binmode> and C<err_mode> options are supported. The call to
@@ -788,7 +788,7 @@ C<write_file> with the new data and the existing file data.
 
 The first argument to C<prepend_file> is the filename.
 
-The next argument(s) is either a hash reference or a flattened hash,
+The next argument is an optional hash reference of
 C<< key => value >> pairs. The options are passed through to the
 L<File::Slurp/"write_file"> function. All options are described there.
 
@@ -866,11 +866,15 @@ ensure the proper directory separator is used for your OS. See L<File::Spec>.
 	# or we can get a scalar reference
 	my $text_ref = read_file('/path/file', scalar_ref => 1);
 
-This function reads in an entire file and returns its contents to the
-caller. In scalar context it returns the entire file as a single
-scalar. In list context it will return a list of lines (using the
-current value of C<$/> as the separator, including support for paragraph
-mode when it is set to C<''>).
+This function reads in an entire file and returns its contents to the caller.
+In list context, or in scalar context with the C<array_ref> option set, it
+splits the contents using the current value of C<$/> as the separator.
+Paragraph mode, when C<$/> is set to C<''>, is supported.  Note: Any value for
+C<$/> different from the default newline C<"\n"> and the empty string C<''>
+should not be used.
+
+In scalar context with the C<array_ref> option set to false, it returns the
+contents of the entire file as a scalar value.
 
 The first argument is the path to the file to be slurped in.
 
@@ -1002,7 +1006,7 @@ an error. You can change how errors are handled with the C<err_mode> option.
 
 The first argument to C<write_file> is the filename.
 
-The next argument(s) is either a hash reference or a flattened hash,
+The next argument is an optional hash reference of
 C<< key => value >> pairs. The following options are available:
 
 =over
