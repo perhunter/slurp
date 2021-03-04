@@ -22,7 +22,7 @@ jobs:
           # - '5.20.3.3'
           # - '5.18.4.1'
           # - '5.16.3.1'
-          - '5.14.4.1'
+          # - '5.14.4.1'
     steps:
       - name: Set git to use LF
         run: |
@@ -31,12 +31,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Remove GH's Strawberry Perl and MinGW from Path
         run: |
-          echo "$GITHUB_PATH"
+          $(($env:Path.split(";", [System.StringSplitOptions]::RemoveEmptyEntries) | where{-not ($_ -clike '*Strawberry*' -or $_ -clike '*mingw*')}) -join ';') > $GITHUB_PATH
       - name: Add our new Strawberry Portable Perl Paths
         run: |
           Remove-Item C:\straw -Recurse -ErrorAction Ignore
           mkdir C:\straw
-          echo "C:\straw\c\bin;C:\straw\perl\site\bin;C:\straw\perl\bin;$($GITHUB_PATH)" > $GITHUB_PATH
+          echo "C:\straw\c\bin;C:\straw\perl\site\bin;C:\straw\perl\bin" >> $GITHUB_PATH
           echo $env:PATH
       - name: Set up our new Strawberry Perl
         run: |
