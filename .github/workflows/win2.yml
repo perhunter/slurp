@@ -32,7 +32,6 @@ jobs:
       - name: Remove GH's Strawberry Perl and MinGW from Path
         run: |
           echo "$GITHUB_PATH"
-          echo "$GITHUB_PATH=$(($GITHUB_PATH.split(";", [System.StringSplitOptions]::RemoveEmptyEntries) | where{-not ($_ -clike '*Strawberry*' -or $_ -clike '*mingw*')}) -join ';')"
       - name: Add our new Strawberry Portable Perl Paths
         run: |
           Remove-Item C:\straw -Recurse -ErrorAction Ignore
